@@ -449,6 +449,8 @@ void ThemeController::resolve() {
             if (file.size() > 64 * 1024LL * 1024) return ThemeResult{{}, "limits", false};
             QByteArray bytes;
             while (!file.atEnd()) {
+                // The GUI thread can change this atomic flag between reads.
+                // cppcheck-suppress identicalConditionAfterEarlyExit
                 if (cancellation->load()) return ThemeResult{};
                 const auto block = file.read(65536);
                 if (block.isEmpty() && file.error() != QFileDevice::NoError) return ThemeResult{{}, "unavailable", true};
