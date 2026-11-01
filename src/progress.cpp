@@ -24,8 +24,12 @@ std::optional<double> Eta::update(double fraction, Clock::time_point now) {
     if (fraction >= 1) return 0;
     const double elapsed = std::chrono::duration<double>(now - start_).count();
     if (elapsed < 5 || updates_ < 2 || fraction <= 0) return {};
-    const double remaining = elapsed * (1 - fraction) / fraction;
-    estimate_ = estimate_ ? *estimate_ * 0.8 + remaining * 0.2 : remaining;
+    if (estimate_ && now - sampled_ < std::chrono::seconds(5)) return estimate_;
+    const double finish = elapsed / fraction;
+    const double interval = std::chrono::duration<double>(now - sampled_).count();
+    finish_ = finish_ ? *finish_ + (1 - std::exp(-interval / 15)) * (finish - *finish_) : finish;
+    estimate_ = std::max(0.0, *finish_ - elapsed);
+    sampled_ = now;
     return estimate_;
 }
 std::string eta_text(std::optional<double> seconds) {

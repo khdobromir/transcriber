@@ -124,136 +124,151 @@
             <translation>Could not open %1</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="97" />
+            <location filename="../backend.cpp" line="102" />
             <source>Backend не ответил на отмену; процесс остановлен принудительно. Частичные файлы сохранены.</source>
             <translation>Backend did not respond to cancellation and was forcibly stopped. Partial files were preserved.</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="111" />
+            <location filename="../backend.cpp" line="116" />
             <source>Не удалось запустить backend: %1</source>
             <translation>Could not start backend: %1</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="147" />
-            <location filename="../backend.cpp" line="236" />
+            <location filename="../backend.cpp" line="156" />
+            <location filename="../backend.cpp" line="252" />
             <source>Готово</source>
             <translation>Completed</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="226" />
+            <location filename="../backend.cpp" line="242" />
             <source>Задача не запускалась</source>
             <translation>No task started</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="228" />
+            <location filename="../backend.cpp" line="244" />
             <source>Запуск</source>
             <translation>Starting</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="230" />
+            <location filename="../backend.cpp" line="246" />
             <source>В работе</source>
             <translation>Running</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="232" />
+            <location filename="../backend.cpp" line="248" />
             <source>Запрошена отмена</source>
             <translation>Cancellation requested</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="234" />
+            <location filename="../backend.cpp" line="250" />
             <source>Сохранение результата</source>
             <translation>Saving result</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="238" />
+            <location filename="../backend.cpp" line="254" />
             <source>Прервано</source>
             <translation>Interrupted</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="240" />
+            <location filename="../backend.cpp" line="256" />
             <source>Ошибка</source>
             <translation>Failed</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="256" />
-            <location filename="../backend.cpp" line="307" />
+            <location filename="../backend.cpp" line="272" />
+            <location filename="../backend.cpp" line="323" />
             <source>Запуск…</source>
             <translation>Starting…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="329" />
+            <location filename="../backend.cpp" line="345" />
             <source>Отмена и сохранение частичного результата…</source>
             <translation>Cancelling and saving partial results…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="358" />
+            <location filename="../backend.cpp" line="374" />
             <source>Слишком большое событие backend</source>
             <translation>Backend event is too large</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="390" />
+            <location filename="../backend.cpp" line="406" />
             <source>Проверка локального входа…</source>
             <translation>Checking local input…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="391" />
+            <location filename="../backend.cpp" line="407" />
             <source>Получение информации о видео…</source>
             <translation>Getting video information…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="392" />
+            <location filename="../backend.cpp" line="408" />
             <source>Загрузка аудио…</source>
             <translation>Downloading audio…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="393" />
+            <location filename="../backend.cpp" line="409" />
             <source>Чтение аудио из кэша…</source>
             <translation>Reading cached audio…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="394" />
+            <location filename="../backend.cpp" line="410" />
             <source>Подготовка аудио…</source>
             <translation>Preparing audio…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="395" />
+            <location filename="../backend.cpp" line="411" />
             <source>Подготовка частей…</source>
             <translation>Preparing chunks…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="396" />
+            <location filename="../backend.cpp" line="412" />
             <source>Распознавание речи…</source>
             <translation>Recognizing speech…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="397" />
-            <location filename="../backend.cpp" line="440" />
+            <location filename="../backend.cpp" line="413" />
+            <location filename="../backend.cpp" line="457" />
             <source>Сохранение результата…</source>
             <translation>Saving result…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="408" />
-            <source>Осталось примерно %1:%2</source>
-            <translation>Approximately %1:%2 remaining</translation>
+            <location filename="../eta.cpp" line="22" />
+            <source>Уточняем оставшееся время…</source>
+            <translation>Refining remaining time…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="409" />
+            <location filename="../eta.cpp" line="25" />
             <source>Оценка времени рассчитывается…</source>
             <translation>Estimating remaining time…</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="410" />
-            <location filename="../backend.cpp" line="415" />
+            <location filename="../eta.cpp" line="31" />
+            <source>Осталось примерно %1 ч %2 мин</source>
+            <translation>Approximately %1 h %2 min remaining</translation>
+        </message>
+        <message>
+            <location filename="../eta.cpp" line="32" />
+            <source>Осталось примерно %1 мин</source>
+            <translation>Approximately %1 min remaining</translation>
+        </message>
+        <message>
+            <location filename="../eta.cpp" line="35" />
+            <source>Осталось примерно %1 с</source>
+            <translation>Approximately %1 s remaining</translation>
+        </message>
+        <message>
+            <location filename="../backend.cpp" line="426" />
+            <location filename="../backend.cpp" line="432" />
             <source>Диагностика backend: %1</source>
             <translation>Backend diagnostic: %1</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="453" />
+            <location filename="../backend.cpp" line="470" />
             <source>Backend завершился без подтверждённого результата. Проверьте журналы.</source>
             <translation>Backend exited without a confirmed result. Check the logs.</translation>
         </message>
         <message>
-            <location filename="../backend.cpp" line="561" />
+            <location filename="../backend.cpp" line="579" />
             <source>Показан конец текста; полный TXT доступен отдельной кнопкой.</source>
             <translation>Showing the end of the transcript; use the Full TXT button to open the complete text.</translation>
         </message>
@@ -338,35 +353,35 @@
         </message>
         <message>
             <location filename="../Main.qml" line="85" />
-            <location filename="../Main.qml" line="107" />
+            <location filename="../Main.qml" line="109" />
             <source>Настройки</source>
             <translation>Settings</translation>
         </message>
         <message>
-            <location filename="../Main.qml" line="101" />
+            <location filename="../Main.qml" line="103" />
             <source>Локально · CPU</source>
             <translation>Local · CPU</translation>
         </message>
         <message>
             <location filename="../Main.qml" line="85" />
-            <location filename="../Main.qml" line="107" />
+            <location filename="../Main.qml" line="109" />
             <source>Расшифровка</source>
             <translation>Transcription</translation>
         </message>
         <message>
             <location filename="../Main.qml" line="85" />
-            <location filename="../Main.qml" line="107" />
+            <location filename="../Main.qml" line="109" />
             <source>История</source>
             <translation>History</translation>
         </message>
         <message>
             <location filename="../Main.qml" line="85" />
-            <location filename="../Main.qml" line="107" />
+            <location filename="../Main.qml" line="109" />
             <source>Модели</source>
             <translation>Models</translation>
         </message>
         <message>
-            <location filename="../Main.qml" line="127" />
+            <location filename="../Main.qml" line="129" />
             <source>Отменить</source>
             <translation>Cancel</translation>
         </message>
@@ -630,29 +645,52 @@
     <context>
         <name>ThemeController</name>
         <message>
-            <location filename="../theme.cpp" line="250" />
+            <location filename="../theme.cpp" line="347" />
             <source>Изображение превышает ограничения размера. Сохранена предыдущая палитра.</source>
             <translation>The image exceeds the size limits. The previous palette is retained.</translation>
         </message>
         <message>
-            <location filename="../theme.cpp" line="251" />
+            <location filename="../theme.cpp" line="348" />
             <source>Автоматические обои недоступны. Выберите картинку или цвет.</source>
             <translation>Automatic wallpaper is unavailable. Choose a picture or a color.</translation>
         </message>
         <message>
-            <location filename="../theme.cpp" line="252" />
+            <location filename="../theme.cpp" line="349" />
             <source>Не удалось прочитать фон. Сохранена предыдущая палитра; можно повторить.</source>
             <translation>Could not read the background. The previous palette is retained; you can retry.</translation>
         </message>
         <message>
-            <location filename="../theme.cpp" line="253" />
+            <location filename="../theme.cpp" line="350" />
             <source>Подбираем цвета…</source>
             <translation>Finding your colors…</translation>
         </message>
         <message>
-            <location filename="../theme.cpp" line="254" />
+            <location filename="../theme.cpp" line="351" />
             <source>Цвета обрабатываются только на этом компьютере.</source>
             <translation>Colors are processed only on this computer.</translation>
+        </message>
+    </context>
+    <context>
+        <name>TranscriptView</name>
+        <message>
+            <location filename="../TranscriptView.qml" line="77" />
+            <source>Показан конец текста; полный TXT доступен отдельной кнопкой.</source>
+            <translation>Showing the end of the transcript; use the Full TXT button to open the complete text.</translation>
+        </message>
+        <message>
+            <location filename="../TranscriptView.qml" line="110" />
+            <source>Текст появится во время распознавания. Полный результат сохраняется в TXT.</source>
+            <translation>Text will appear during recognition. The complete result is saved as TXT.</translation>
+        </message>
+        <message>
+            <location filename="../TranscriptView.qml" line="111" />
+            <source>Частичный текст расшифровки</source>
+            <translation>Partial transcript</translation>
+        </message>
+        <message>
+            <location filename="../TranscriptView.qml" line="122" />
+            <source>К новому тексту</source>
+            <translation>Jump to new text</translation>
         </message>
     </context>
     <context>
@@ -864,59 +902,49 @@
             <translation>Recognition progress</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="126" />
+            <location filename="../TranscriptionPage.qml" line="127" />
             <source>Повторить задачу</source>
             <translation>Retry task</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="127" />
+            <location filename="../TranscriptionPage.qml" line="128" />
             <source>Каталог задачи</source>
             <translation>Task directory</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="128" />
+            <location filename="../TranscriptionPage.qml" line="129" />
             <source>Журналы задачи</source>
             <translation>Task logs</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="142" />
+            <location filename="../TranscriptionPage.qml" line="143" />
             <source>Выбранный результат · %1</source>
             <translation>Selected result · %1</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="144" />
+            <location filename="../TranscriptionPage.qml" line="145" />
             <source>Показать результат текущей задачи</source>
             <translation>Show current task result</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="148" />
+            <location filename="../TranscriptionPage.qml" line="149" />
             <source>Каталог</source>
             <translation>Directory</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="149" />
+            <location filename="../TranscriptionPage.qml" line="150" />
             <source>Полный TXT</source>
             <translation>Full TXT</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="152" />
+            <location filename="../TranscriptionPage.qml" line="153" />
             <source>Журналы</source>
             <translation>Logs</translation>
         </message>
         <message>
-            <location filename="../TranscriptionPage.qml" line="157" />
+            <location filename="../TranscriptionPage.qml" line="158" />
             <source>Текст расшифровки</source>
             <translation>Transcript</translation>
-        </message>
-        <message>
-            <location filename="../TranscriptionPage.qml" line="168" />
-            <source>Текст появится во время распознавания. Полный результат сохраняется в TXT.</source>
-            <translation>Text will appear during recognition. The complete result is saved as TXT.</translation>
-        </message>
-        <message>
-            <location filename="../TranscriptionPage.qml" line="169" />
-            <source>Частичный текст расшифровки</source>
-            <translation>Partial transcript</translation>
         </message>
     </context>
     <context>

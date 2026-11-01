@@ -4,7 +4,7 @@ if(BUILD_TESTING)
 endif()
 qt_standard_project_setup(REQUIRES 6.8)
 add_subdirectory(../third_party/material-color-utilities ${CMAKE_CURRENT_BINARY_DIR}/material-color-utilities)
-qt_add_library(transcribe_gui_logic STATIC backend.cpp backend.hpp history.cpp history.hpp models.cpp models.hpp language.cpp language.hpp theme.cpp theme.hpp text.hpp)
+qt_add_library(transcribe_gui_logic STATIC backend.cpp backend.hpp eta.cpp eta.hpp history.cpp history.hpp models.cpp models.hpp language.cpp language.hpp theme.cpp theme.hpp text.hpp)
 target_link_libraries(transcribe_gui_logic PUBLIC transcribe_core Qt6::Quick Qt6::Network Qt6::Concurrent material_color_utilities)
 target_include_directories(transcribe_gui_logic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 transcribe_warnings(transcribe_gui_logic)
@@ -28,7 +28,7 @@ set_target_properties(transcribe-gui PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 qt_add_qml_module(transcribe-gui URI Transcribe.App VERSION 1.0
     OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Transcribe/App"
     IMPORT_PATH "${CMAKE_CURRENT_BINARY_DIR}"
-    QML_FILES Main.qml ComponentGallery.qml TranscriptionPage.qml HistoryPage.qml ModelsPage.qml AppearancePage.qml UiButton.qml UiField.qml UiTextArea.qml UiCheck.qml UiSwitch.qml UiCombo.qml UiSpin.qml UiCard.qml UiProgress.qml UiIcon.qml UiStatus.qml)
+    QML_FILES Main.qml ComponentGallery.qml TranscriptionPage.qml TranscriptView.qml HistoryPage.qml ModelsPage.qml AppearancePage.qml UiButton.qml UiField.qml UiTextArea.qml UiCheck.qml UiSwitch.qml UiCombo.qml UiSpin.qml UiCard.qml UiProgress.qml UiIcon.qml UiStatus.qml)
 target_link_libraries(transcribe-gui PRIVATE transcribe_gui_logic transcribe_gui_logicplugin Qt6::QuickControls2)
 transcribe_warnings(transcribe-gui)
 if(WIN32)

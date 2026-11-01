@@ -156,19 +156,9 @@ ScrollView {
                         }
                     }
                     Label { text: qsTr("Текст расшифровки"); font.bold: true }
-                    Label { text: page.backend.transcriptNotice; visible: text.length > 0; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                    ScrollView {
+                    TranscriptView {
+                        backend: page.backend
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 260
-                        UiTextArea {
-                            text: page.backend.transcript
-                            readOnly: true
-                            selectByMouse: true
-                            wrapMode: TextEdit.Wrap
-                            textFormat: TextEdit.PlainText
-                            placeholderText: qsTr("Текст появится во время распознавания. Полный результат сохраняется в TXT.")
-                            Accessible.name: qsTr("Частичный текст расшифровки")
-                        }
                     }
         }
     }

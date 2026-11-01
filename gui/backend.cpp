@@ -91,6 +91,10 @@ Backend::Backend(Paths paths, Readers readers, QObject* parent)
     known_ = settings_.value("history/directories").toStringList();
     knownTimes_ = settings_.value("history/timestamps").toMap();
     previewTimer_.setInterval(500);
+    etaTimer_.setInterval(5000);
+    connect(&etaTimer_, &QTimer::timeout, this, [this] {
+        if (etaPresentation_.refresh(EtaPresentation::Clock::now())) emit changed();
+    });
     cancelTimer_.setSingleShot(true);
     cancelTimer_.setInterval(5000);
     connect(&cancelTimer_, &QTimer::timeout, this, [this] {
@@ -121,10 +125,14 @@ Backend::Backend(Paths paths, Readers readers, QObject* parent)
         try {
             const auto text = previewWatcher_.result();
             if (previewGeneration_ == selectionGeneration_) {
+                const auto tail = QFileInfo(selected_ + "/transcripts/transcript.txt").size() > qint64{512} * 1024;
+                const bool modified = transcript_ != text || transcriptTail_ != tail;
+                const bool hadError = !previewError_.isEmpty();
                 transcript_ = text;
-                transcriptTail_ = QFileInfo(selected_ + "/transcripts/transcript.txt").size() > qint64{512} * 1024;
+                transcriptTail_ = tail;
                 previewError_.clear();
-                emit transcriptChanged();
+                if (modified) emit transcriptChanged();
+                if (hadError) emit changed();
             }
         } catch (const std::exception& error) {
             if (previewGeneration_ == selectionGeneration_) {
@@ -147,7 +155,7 @@ Backend::Backend(Paths paths, Readers readers, QObject* parent)
             transition(TaskState::completed);
             stage_ = UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Готово"));
             progress_ = 1;
-            eta_.clear();
+            resetEta();
             if (selected_ == result_) selectedStatus_ = "completed";
         } else {
             transition(TaskState::failed);
@@ -219,7 +227,14 @@ Backend::~Backend() {
     joinWorker(completionWatcher_);
 }
 void Backend::transition(TaskState state) {
-    if (transitionAllowed(state_, state)) state_ = state;
+    if (transitionAllowed(state_, state)) {
+        state_ = state;
+        if (state != TaskState::starting && state != TaskState::running) resetEta();
+    }
+}
+void Backend::resetEta() {
+    etaTimer_.stop();
+    etaPresentation_.reset();
 }
 QString Backend::status() const {
     switch (state_) {
@@ -249,7 +264,7 @@ void Backend::start(const QString& input, const QVariantMap& values) {
     error_.clear();
     warning_.clear();
     result_.clear();
-    eta_.clear();
+    resetEta();
     progress_ = -1;
     lastInput_ = input;
     lastValues_ = values;
@@ -297,7 +312,7 @@ void Backend::start(const QString& input, const QVariantMap& values) {
         settings_.setValue("roots", roots_);
         pending_.clear();
         diagnostics_.clear();
-        eta_.clear();
+        resetEta();
         hello_ = terminal_ = protocolFailure_ = false;
         terminalCode_ = -1;
         terminalStatus_.clear();
@@ -398,18 +413,19 @@ void Backend::acceptEvent(const transcribe::ProtocolMessage& message) {
         else if (stage == "merge" || event.type == transcribe::EventType::finalizing) stage_ = UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Сохранение результата…"));
         if (stage != "recognize") {
             progress_ = -1;
-            eta_.clear();
+            resetEta();
         }
     }
     if (event.type == transcribe::EventType::finalizing && state_ != TaskState::cancel_requested) transition(TaskState::finalizing);
     if (event.type == transcribe::EventType::progress) {
         progress_ = event.fraction;
-        if (event.eta) {
-            const auto seconds = static_cast<qint64>(std::min(*event.eta, 359999.0));
-            eta_ = UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Осталось примерно %1:%2")).arg(seconds / 60).arg(seconds % 60, 2, 10, QLatin1Char('0'));
-        } else eta_ = UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Оценка времени рассчитывается…"));
+        if (!terminal_ && (state_ == TaskState::running || state_ == TaskState::starting)) {
+            etaPresentation_.observe(event.fraction, event.eta, EtaPresentation::Clock::now());
+            if (!etaTimer_.isActive()) etaTimer_.start();
+        }
     } else if (event.type == transcribe::EventType::warning) warning_ = event.message_i18n ? UiText(*event.message_i18n) : UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Диагностика backend: %1")).arg(QString::fromStdString(event.message));
     else if (event.type == transcribe::EventType::completed || event.type == transcribe::EventType::failed) {
+        resetEta();
         terminal_ = true;
         terminalStatus_ = QString::fromStdString(event.status);
         terminalCode_ = event.code;
@@ -500,6 +516,7 @@ void Backend::selectResult(const QString& directory, const QString& status) { //
     transcript_.clear();
     transcriptTail_ = false;
     previewError_.clear();
+    emit transcriptReset();
     emit transcriptChanged();
     emit changed();
     readPreview();

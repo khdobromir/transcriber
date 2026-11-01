@@ -6,6 +6,7 @@
 #include "models.hpp"
 #include "protocol.hpp"
 #include "states.hpp"
+#include "eta.hpp"
 #include <QFutureWatcher>
 #include <QProcess>
 #include <QSettings>
@@ -87,7 +88,7 @@ public:
     void initializeLanguage();
     QString transcript() const { return transcript_; }
     double progress() const { return progress_; }
-    QString eta() const { return eta_; }
+    QString eta() const { return etaPresentation_.text(); }
     QString outputDirectory() const { return output_; }
     QString modelSelection() const { return modelSelection_; }
     QString appHome() const { return dataRoot_; }
@@ -112,12 +113,14 @@ public:
 signals:
     void changed();
     void transcriptChanged();
+    void transcriptReset();
     void draftChanged();
 
 private:
     QString modelSelection_ = "medium";
     QString binary_, dataRoot_, output_, result_, selected_, selectedStatus_ = "unknown", transcript_, lastInput_;
-    UiText stage_, error_, warning_, eta_, previewError_, historyError_;
+    UiText stage_, error_, warning_, previewError_, historyError_;
+    EtaPresentation etaPresentation_;
     bool transcriptTail_ = false;
     QVariantMap lastValues_;
     TaskState state_ = TaskState::idle;
@@ -131,7 +134,7 @@ private:
     QString terminalStatus_;
     int terminalCode_ = -1;
     QProcess process_;
-    QTimer previewTimer_, cancelTimer_;
+    QTimer previewTimer_, cancelTimer_, etaTimer_;
     QSettings settings_;
     std::unique_ptr<LanguageController> language_;
     std::unique_ptr<ThemeController> theme_;
@@ -155,4 +158,5 @@ private:
     void settled();
     void transition(TaskState state);
     void selectResult(const QString& directory, const QString& status);
+    void resetEta();
 };
