@@ -27,8 +27,9 @@ std::optional<double> Eta::update(double fraction, Clock::time_point now) {
     if (estimate_ && now - sampled_ < std::chrono::seconds(5)) return estimate_;
     const double finish = elapsed / fraction;
     const double interval = std::chrono::duration<double>(now - sampled_).count();
-    finish_ = finish_ ? *finish_ + (1 - std::exp(-interval / 15)) * (finish - *finish_) : finish;
-    estimate_ = std::max(0.0, *finish_ - elapsed);
+    const double smoothed = finish_ ? *finish_ + (1 - std::exp(-interval / 15)) * (finish - *finish_) : finish;
+    finish_ = smoothed;
+    estimate_ = std::max(0.0, smoothed - elapsed);
     sampled_ = now;
     return estimate_;
 }
