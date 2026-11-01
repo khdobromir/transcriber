@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
 #include <QScopeGuard>
 #include <QSemaphore>
 #include <QTemporaryDir>
@@ -79,6 +80,9 @@ int opener(const QString& uri) {
 class DesktopTests : public QObject {
     Q_OBJECT
 private slots:
+    void init() {
+        QTest::failOnWarning(QRegularExpression("QProcess: Destroyed while process.*"));
+    }
     void environmentRestoresAbsenceEmptyAndValues() {
         Fixture fixture;
         for (const auto& value : {QString{}, QString("Путь 😀\n$(literal)")}) {

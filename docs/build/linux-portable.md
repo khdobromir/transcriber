@@ -54,7 +54,9 @@ bash scripts/package-linux.sh --qt-root /path/to/Qt/6.8.3/gcc_64 --jobs 2
 ```
 
 Required tools include C++23, CMake 3.24+, Python 3.12+, Git, binutils, patchelf,
-desktop-file-utils, FFmpeg, fonts-dejavu-core, OpenGL headers and Qt 6.8.3.
+desktop-file-utils, FFmpeg, fonts-dejavu-core, Fontconfig development headers,
+OpenGL headers and Qt 6.8.3. Fontconfig is a Linux GUI build dependency; CLI-only
+source builds do not require it.
 [Dockerfile](../../packaging/linux/Dockerfile) is the complete build dependency
 specification. `--work-directory`/`--destination` select output locations.
 Diagnostic `--skip-tests` is recorded; startup/package smoke still runs.
@@ -76,12 +78,45 @@ verification stays enabled. A fully offline first run requires prior model/VAD
 import. Extract-and-run needs temporary disk space and does not install packages;
 automatic fallback on a FUSE error is not implemented.
 
+`AppRun` snapshots all eleven variables it changes or removes, preserving absent
+and empty values: `LD_LIBRARY_PATH`, `QT_PLUGIN_PATH`, `QML_IMPORT_PATH`,
+`QML2_IMPORT_PATH`, `FONTCONFIG_FILE`, `QT_QPA_FONTDIR`, `TRANSCRIBE_CA_BUNDLE`,
+`QT_QPA_PLATFORMTHEME`, `QT_QUICK_BACKEND`, `QT_QPA_PLATFORM_PLUGIN_PATH` and
+`PATH`. Re-entry preserves the original snapshot. This is the environment at
+entry to `AppRun`; the wrapper cannot recover changes made earlier by the
+AppImage runtime.
+
+Opening a result uses a private asynchronous monitor, which launches
+`/usr/bin/xdg-open` with that restored environment and without the snapshot or
+AppImage runtime markers. GUI and recognition processes retain their bundled
+environment. Repeated requests for the same active target are coalesced. Launch
+errors and nonzero exits appear next to the originating result, independently
+of preview/recognition errors. Switching results or restarting a task discards
+obsolete errors. Closing Transcribe stops monitoring without terminating an
+external editor. Cleanup waits at most one second per private monitor, never for
+the desktop application. An exit status of zero means the desktop accepted the request;
+it does not prove that the desktop application subsequently displayed a window.
+
+Before constructing `QGuiApplication`, portable GUI startup explicitly loads
+the private Fontconfig configuration using the bundled library. It preserves
+the configured font directories and XDG cache, and disables automatic rescans
+that could reload incompatible host rules. Invalid or missing private
+configuration prevents startup with an explicit diagnostic.
+
 ## Verification and source materials
 
 Manifest identity includes Git source SHA, dirty flag, source fingerprint,
 versions, required glibc and file/symlink hashes/permissions. Source changes during
 build are rejected. Smoke checks the final AppImage in a fresh Unicode path with
 SDK overrides cleared, not just the staging directory.
+
+Both package smoke tests reject Fontconfig warnings/errors from a healthy
+candidate and retain full logs even on failure. The actual application writes
+an internal diagnostic report checking the loaded Fontconfig path and SHA-256
+against the package manifest, plus Cyrillic glyph availability. An isolated
+process also tests the initialization function, including omitted initialization.
+A separate extracted copy with a damaged private config must fail at actual
+`AppRun` startup. The final AppImage is never modified by this negative test.
 
 Clean Ubuntu/Debian payload tests have no installed Qt/Python/FFmpeg/yt-dlp and
 no network. Native desktop dialogs/portal/clipboard need separate manual checks.

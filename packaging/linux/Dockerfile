@@ -1,11 +1,14 @@
 FROM ubuntu:24.04@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
 ENV DEBIAN_FRONTEND=noninteractive
+# Refresh preinstalled libudev/systemd too, so matching sources remain available
+# in the same authenticated deb-src indexes used for the retained source offer.
 RUN sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources \
     && apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates cmake g++ git make python3 python3-venv curl file binutils \
     patchelf desktop-file-utils ffmpeg shellcheck fonts-dejavu-core \
     libgl-dev libglx-dev libopengl-dev libegl-dev libxkbcommon0 libxkbcommon-x11-0 \
-    libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libdbus-1-3 libfontconfig1 libfontconfig-dev libfreetype6 libssl3t64
+    libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libdbus-1-3 libfontconfig1 libfontconfig-dev libfreetype6 libssl3t64 \
+    libudev1 libsystemd0
 # Retain authenticated deb-src indexes matching the installed runtime packages.
 # The packager downloads their exact source versions without unpacking/building.
 RUN python3 -m venv /opt/aqt && /opt/aqt/bin/pip install --no-cache-dir aqtinstall==3.3.0 \

@@ -18,6 +18,7 @@ void DesktopOpener::reset(int channel) {
         it->second->process.disconnect(this);
         // Only stop the monitor; xdg-open may have exec'd a long-lived editor.
         it->second->process.kill();
+        it->second->process.waitForFinished(1000);
         it = jobs_.erase(it);
     }
 }
@@ -31,6 +32,7 @@ void DesktopOpener::finish(const Key& key, Job* job, const UiText& error) {
         const auto completion = found->second->completion;
         found->second->process.disconnect(this);
         found->second->process.kill();
+        found->second->process.waitForFinished(1000);
         jobs_.erase(found);
         completion(error);
     });
@@ -59,6 +61,7 @@ void DesktopOpener::open(int channel, const QUrl& url, Completion completion) {
     if (found != jobs_.end()) {
         found->second->process.disconnect(this);
         found->second->process.kill();
+        found->second->process.waitForFinished(1000);
         jobs_.erase(found);
     }
     auto owned = std::make_unique<Job>();
