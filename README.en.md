@@ -9,9 +9,11 @@ Use the native desktop GUI or the independent CLI to produce TXT, SRT and VTT.
 Recognition runs locally through whisper.cpp; URL downloads use yt-dlp and media
 conversion uses FFmpeg. Current source provides Russian and English GUI languages,
 with automatic selection and instant switching. Recognition remains Russian;
-the independent CLI retains its Russian console interface. The v0.5.0-beta.1
-prerelease adds a Material You / Material 3 interface, wallpaper/image palettes
-and adaptive navigation. Manual Windows acceptance remains open; v0.4.1 stays stable.
+the independent CLI retains its Russian console interface. The v0.5.0 source
+includes a Material You / Material 3 interface, wallpaper/image palettes and
+adaptive navigation. The user confirmed Windows acceptance of the beta and the
+transcript/ETA fixes. v0.5.0 is prepared locally for owner review; the published
+stable version remains v0.4.1.
 
 **C++23 · Qt Quick / QML · CMake · Linux / Windows · CPU-only**
 
@@ -20,8 +22,8 @@ and adaptive navigation. Manual Windows acceptance remains open; v0.4.1 stays st
 · [Changelog](CHANGELOG.md) · [Documentation](docs/README.md)
 · [Contributing](CONTRIBUTING.md)
 
-See the [beta release notes](docs/releases/v0.5.0-beta.1/notes.md) and
-[verification scope](docs/releases/v0.5.0-beta.1/validation.md).
+See the [v0.5.0 release notes](docs/releases/v0.5.0/notes.md) and
+[preparation and verification status](docs/releases/v0.5.0/validation.md).
 
 ## Demo
 
@@ -33,7 +35,7 @@ The screenshot shows the previous Russian interface.
 
 ```sh
 transcribe --version
-# transcribe 0.5.0-beta.1 (current source)
+# transcribe 0.5.0 (current source)
 transcribe --model small "lecture.wav"
 transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 ```
@@ -45,6 +47,8 @@ The last two examples require installed tools/models and your own media file.
 
 - Local audio/video files and one URL supported by the installed yt-dlp.
 - Live partial text, progress and estimated remaining recognition time.
+- Preserve the reading position and text selection; follow at the bottom or use **Jump to new text**.
+- Smoothed, rounded remaining-time estimates updated once every five seconds.
 - TXT, SRT and VTT exports with one result directory per run.
 - Cancellation, preserved partial results and per-tool diagnostic logs.
 - Model download/import with SHA-256 verification; small, medium and turbo presets.

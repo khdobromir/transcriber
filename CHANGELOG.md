@@ -1,5 +1,21 @@
 # Изменения
 
+## v0.5.0 — local preparation, 2026-11-01
+
+Prepared for owner review; publication and tag creation are not authorized yet.
+See [release notes](docs/releases/v0.5.0/notes.md) and
+[verification status](docs/releases/v0.5.0/validation.md).
+
+- Promote the Material You / Material 3 GUI and bilingual interface from the beta
+  to stable source version 0.5.0, with the prerelease suffix removed.
+- Hold the transcript preview and selection while reading; follow new fragments
+  at the bottom or resume with **Jump to new text**, including previews over 512 KiB.
+- Recalculate ETA at five-second intervals, smooth the predicted finish time and
+  display rounded minutes or five-second steps. Mark stalled estimates as refining.
+- Record the user's successful Windows 11 24H2 beta and focused UI acceptance.
+- Preserve CLI/protocol/result compatibility. Record the existing Linux AppImage
+  external-launch environment issue as an unresolved packaging limitation.
+
 ## v0.5.0-beta.1 — 2026-10-17
 
 Prerelease for the Material You interface. See [notes](docs/releases/v0.5.0-beta.1/notes.md)
