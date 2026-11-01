@@ -93,9 +93,10 @@ environment. Repeated requests for the same active target are coalesced. Launch
 errors and nonzero exits appear next to the originating result, independently
 of preview/recognition errors. Switching results or restarting a task discards
 obsolete errors. Closing Transcribe stops monitoring without terminating an
-external editor. Cleanup waits at most one second per private monitor, never for
-the desktop application. An exit status of zero means the desktop accepted the request;
-it does not prove that the desktop application subsequently displayed a window.
+external editor. Each killed monitor gets an explicit one-second wait before
+disposal; the desktop application is never waited for. An exit status of zero
+means the desktop accepted the request. It does not prove that the desktop
+application subsequently displayed a window.
 
 Before constructing `QGuiApplication`, portable GUI startup explicitly loads
 the private Fontconfig configuration using the bundled library. It preserves

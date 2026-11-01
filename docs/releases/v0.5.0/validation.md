@@ -50,7 +50,8 @@ Fresh stable-version build/test/version/help/install results and compact logs
 are retained with the local preparation record in
 `dist/releases/v0.5.0-local-review/`. This directory is ignored by Git and is not
 an uploaded release. No previous beta CI or package digest validates a new stable
-package. Native MSVC, Qt 6.8.3 package builds and final-SHA remote CI are pending.
+package. At that stage native MSVC, Qt 6.8.3 package builds and final-SHA remote
+CI were pending; the later Linux candidate checks are recorded below.
 
 For stable `0.5.0`, GCC Debug rebuilt successfully and all 28 CTest suites passed
 again. Clang 23.1.4 built the application-only Release GUI/CLI with warnings as
@@ -70,13 +71,98 @@ source, tests and documentation; no private media, models, cookies, generated
 builds or editor settings are staged. The user's untracked `.vscode/` is preserved;
 future release packaging must use a clean checkout of the committed candidate.
 
-An existing Linux packaging issue remains: `packaging/linux/AppRun` exports the
-bundle's `LD_LIBRARY_PATH`/Qt paths, while `QDesktopServices::openUrl()` launches
-external applications without restoring their environment. Earlier beta
-diagnosis reproduced a Nautilus library-symbol failure; the current source still
-has that combination. Fontconfig host-rule compatibility was also unresolved.
-This is a known distribution risk, not a passing external-desktop integration
-check. Publication review must account for it; the UI commits do not fix it.
+### Linux runtime correction and candidate verification
+
+The Linux correction is recorded in local commits `27e31c6`, `dc505ab` and
+`3616a0e`. The last commit is the exact clean source of the reviewed AppImage;
+the subsequent acceptance-document commit does not relabel its bytes or SHA.
+The implementation restores all eleven AppRun variables for external desktop
+processes, preserving absent/empty/custom values and the original snapshot on
+re-entry. Recovery stops at the environment on entry to AppRun, not an earlier
+AppImage-runtime state. GUI/CLI keep their bundle environment.
+
+A separate asynchronous process monitors xdg-open. The private monitor can be
+stopped and reaped without killing the external application; its explicit wait
+after killing a monitor is limited to one second. Active duplicate targets are coalesced. Late errors
+are scoped by task/selection generation, directory and request; distinct error
+properties survive successful preview reads and do not change recognition
+status. Native nonportable/Windows opening continues through QDesktopServices.
+
+Portable Fontconfig initialization runs before QGuiApplication in the actual
+application and in the separately configured real-GUI harness. It selects the
+private config without loading incompatible host templates. Font directories
+and the XDG cache are preserved; automatic rescanning is disabled. Linux GUI
+builds now require libfontconfig-dev; CLI-only builds remain independent of it.
+The pinned builder explicitly refreshes libsystemd0/libudev1/liblzma5, whose base
+image versions no longer all had matching sources in current Ubuntu indexes.
+No source-retention check or glibc gate was weakened.
+
+Fresh native Qt 6.12 verification passed all 30 CTest suites with local sockets
+permitted for the HTTP controller fixtures. The isolated Ubuntu
+24.04/Qt 6.8.3 clean-source build passed all 30 together with warnings as errors,
+QML lint and all 184 English translations. ASan/UBSan passed the desktop,
+portable-font, GUI QML and GUI/CLI integration tests; the final monitor cleanup
+and ETA adjustment also passed focused sanitizer reruns. Leak detection was
+disabled. New regressions cover all environment states/re-entry, launch failure,
+nonzero/crashed handlers, long-running handlers, repeat clicks, shutdown,
+selection/task changes and error persistence during preview completion. The
+monitor cleanup regression failed against the old code, then passed with the
+fix. Python package helper tests passed 20/20; AppRun is covered by shellcheck.
+
+Full clang-tidy 18 inspection exposed one unchecked-optional diagnostic in the
+previous ETA code. Computing the same smoothed value in a local double removes
+that diagnostic without changing the formula or suppressing checks. Targeted
+clang-tidy 18 reruns accepted all subsequent changed C++ files. Full Cppcheck
+accepted all 46 compilation entries. Native clang-tidy and changed-line
+clang-format 18 checks also passed. The committed source archive was checked
+against all 359 Git blobs/types/executable flags and rebuilt as a strict Clang
+Release CLI, reporting transcribe 0.5.0 without acquiring Fontconfig.
+
+The exact AppImage SHA-256 is
+`381e1ec2cdc06989528333cee7af229a0db12d45218f73bc80ddfebe819f8864`.
+It was built with explicit `--release --real-smoke`; required glibc stays within
+the automatic 2.39 baseline. The final image passed actual AppRun/main startup,
+bundled-tool/Unicode-path checks and the real GUI-to-bundled-CLI recognition of
+the pinned public Russian fixture with small-q5_1, including preview and
+TXT/SRT/VTT. Healthy startup logs contain no Fontconfig warning/error. Reports
+confirm bundled Fontconfig 2.15.0, its loaded-library SHA matching the manifest,
+private config and Cyrillic glyphs. A damaged-config copy fails at actual AppRun
+startup with complete output retained. The isolated initializer probe also
+rejects skipped initialization, missing config and malformed config.
+
+The same unchanged final image passed offline clean Ubuntu 24.04 and Debian 13
+startup, ASR and damaged-config checks, with no installed Qt/Python/FFmpeg/tools.
+Docker socket access was unavailable, so the pinned OCI roots were run using
+Bubblewrap user/network namespaces and the unchanged smoke_linux_clean.sh.
+This records equivalent clean payload checks, not a successful Docker build or
+execution of the Docker orchestration in check_linux_candidate.py. OCI digests,
+commands, full logs and public input hashes are retained for reproduction.
+
+Native Wayland verification on the current Omarchy/Hyprland host used the same
+image bytes. Real GUI buttons opened a Unicode result directory in Nautilus and
+TXT in Alacritty/Neovim with a private test MIME association. External processes
+had no snapshot variables and loaded host GLib/Fontconfig; the GUI environment
+remained unchanged. Repeated requests produced one window per target. Closing
+Transcribe exited normally and left both desktop applications alive; only the
+test windows were subsequently closed. This separately verifies desktop opening;
+the offscreen checks alone do not establish it.
+
+Two host observations are retained without claiming fixes outside this scope:
+generic xdg-open launches the host's terminal-only nvim.desktop without a new
+terminal, so the graphical TXT check used a private association rather than
+changing user MIME settings. Qt 6.8.3 also emitted its cached-DPI diagnostic on
+native window updates; the windows continued working. No Fontconfig warning was
+hidden or accepted as a healthy result.
+
+The current review materials are in `dist/releases/v0.5.0-linux-review/`, including
+the exact candidate record, matching source/build-input archives, manifests,
+full run logs, font diagnostics, public speech/model inputs and native screenshots.
+The earlier v0.5.0-local-review directory still describes its older source and
+native build; those old bytes were not renamed as the new portable candidate.
+Required evidence is copied out of .cache/linux-package-container/run-* before
+temporary build environments are removed. Existing user .vscode and the untracked
+review bundle are preserved. Windows acceptance above remains the user's report;
+no Windows package hash or source SHA is invented for these Linux checks.
 
 After owner review, use the existing release procedure to obtain final-SHA CI,
 build the final Windows ZIP/Linux AppImage and matching source/build-input/notice
