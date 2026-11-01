@@ -1,4 +1,7 @@
 #include "backend.hpp"
+#ifdef Q_OS_LINUX
+#include "portable_fonts.hpp"
+#endif
 #include <QGuiApplication>
 #include <QIcon>
 #include <QQmlApplicationEngine>
@@ -9,14 +12,20 @@
 // NOLINTNEXTLINE(bugprone-throwing-static-initialization): Qt requires this generated registration before QML engine startup.
 Q_IMPORT_QML_PLUGIN(TranscribePlugin)
 int main(int argc, char** argv) {
-    QQuickStyle::setStyle("Material");
-    QGuiApplication app(argc, argv);
-    app.setApplicationVersion(TRANSCRIBE_VERSION);
-    app.setWindowIcon(QIcon(":/icons/icon.png"));
-    app.setApplicationName("Transcribe");
-    app.setOrganizationName("Transcribe");
-    app.setDesktopFileName("transcribe-gui");
     try {
+#ifdef Q_OS_LINUX
+        initializePortableFonts();
+#endif
+        QQuickStyle::setStyle("Material");
+        QGuiApplication app(argc, argv);
+        app.setApplicationVersion(TRANSCRIBE_VERSION);
+        app.setWindowIcon(QIcon(":/icons/icon.png"));
+        app.setApplicationName("Transcribe");
+        app.setOrganizationName("Transcribe");
+        app.setDesktopFileName("transcribe-gui");
+#ifdef Q_OS_LINUX
+        writePortableFontDiagnostics();
+#endif
         Backend backend;
         backend.initializeLanguage();
         QQmlApplicationEngine engine;

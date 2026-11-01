@@ -14,7 +14,8 @@
   test is registered when FFmpeg is found. Runtime ASR/model dependencies are
   separate from compilation of Transcribe itself.
 - Linux GUI builds with the official Qt SDK need OpenGL development libraries;
-  Ubuntu packages include `libgl-dev libglx-dev libopengl-dev libegl-dev`.
+  Ubuntu packages include `libgl-dev libglx-dev libopengl-dev libegl-dev` and
+  `libfontconfig-dev`. Fontconfig is a Linux GUI build dependency, not a CLI-only one.
 - Windows: Visual Studio 2022 C++ workload/Windows SDK, x64 developer environment.
   Its preset generator needs CMake 3.21+ (the CLI project still accepts 3.20
   with other supported generators). Official GUI packages require CMake 3.24+,

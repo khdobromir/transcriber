@@ -5,7 +5,6 @@
 #include "platform.hpp"
 #include "result.hpp"
 #include <QCoreApplication>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QJsonDocument>
@@ -60,20 +59,21 @@ QString readTranscript(const QString& directory, const Backend::Cancel& cancel) 
         return {};
     }
 }
-UiText openResultFile(const QString& directory, const QString& extension) {
-    if (directory.isEmpty()) return UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Каталог результата ещё не создан"));
-    if (!extension.isEmpty() && extension != "txt" && extension != "srt" && extension != "vtt" && extension != "logs") return UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Неизвестный формат результата"));
+std::pair<QString, UiText> resultFile(const QString& directory, const QString& extension) {
+    if (directory.isEmpty()) return {{}, UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Каталог результата ещё не создан"))};
+    if (!extension.isEmpty() && extension != "txt" && extension != "srt" && extension != "vtt" && extension != "logs") return {{}, UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Неизвестный формат результата"))};
     auto path = directory;
     if (extension == "logs") path += "/logs";
     else if (!extension.isEmpty()) path += "/transcripts/transcript." + extension;
-    if (!QFileInfo::exists(path) || !QDesktopServices::openUrl(QUrl::fromLocalFile(path))) return UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Не удалось открыть %1")).arg(path);
-    return {};
+    if (!QFileInfo::exists(path)) return {{}, UiText::translated("Backend", QT_TRANSLATE_NOOP("Backend", "Не удалось открыть %1")).arg(path)};
+    return {path, {}};
 }
 } // namespace
 Backend::Backend(QObject* parent) : Backend(Paths{backendBinary(), settingsFile(), pathText(transcribe::app_home())}, parent) {}
 Backend::Backend(Paths paths, QObject* parent) : Backend(std::move(paths), Readers{}, parent) {}
 Backend::Backend(Paths paths, Readers readers, QObject* parent)
     : QObject(parent), binary_(std::move(paths.binary)), dataRoot_(std::move(paths.dataRoot)), settings_(paths.settingsFile, QSettings::IniFormat), history_(this), models_(dataRoot_, paths.modelRecords.isEmpty() ? ModelManager::manifest() : std::move(paths.modelRecords), this) {
+    desktop_ = std::make_unique<DesktopOpener>(paths.desktopHelper.isEmpty() ? QFileInfo(binary_).absolutePath() + "/transcribe-desktop-opener" : paths.desktopHelper, paths.desktopLauncher);
     QFile selected(dataRoot_ + "/default-model");
     if (selected.size() < 128 && selected.open(QIODevice::ReadOnly)) modelSelection_ = QString::fromUtf8(selected.readLine()).trimmed();
     Q_INIT_RESOURCE(app_icon);
@@ -205,6 +205,7 @@ Backend::Backend(Paths paths, Readers readers, QObject* parent)
 }
 Backend::~Backend() {
     closing_ = true;
+    desktop_.reset();
     ++taskGeneration_;
     ++selectionGeneration_;
     ++historyGeneration_;
@@ -260,6 +261,8 @@ QString Backend::status() const {
 QString Backend::filePath(const QUrl& url) const { return url.toLocalFile(); }
 void Backend::start(const QString& input, const QVariantMap& values) {
     if (active()) return;
+    desktop_->reset(1);
+    taskOpenError_.clear();
     ++taskGeneration_;
     error_.clear();
     warning_.clear();
@@ -509,6 +512,8 @@ void Backend::refreshHistory() {
     historyWatcher_.setFuture(QtConcurrent::run([roots, known, timestamps, reader, cancel] { return reader(roots, known, timestamps, cancel); }));
 }
 void Backend::selectResult(const QString& directory, const QString& status) { // NOLINT(bugprone-easily-swappable-parameters): result directory precedes its saved metadata status.
+    desktop_->reset(0);
+    resultOpenError_.clear();
     ++selectionGeneration_;
     if (previewCancel_) previewCancel_->store(true);
     selected_ = directory;
@@ -540,16 +545,26 @@ void Backend::retry() {
     }
 }
 void Backend::openResult(const QString& extension) {
-    previewError_ = openResultFile(selected_, extension);
-    emit changed();
+    openResultFile(false, extension);
 }
 void Backend::openTaskResult(const QString& extension) {
-    const auto message = openResultFile(result_, extension);
-    if (!message.isEmpty()) {
-        if (!error_.isEmpty()) error_ += '\n';
-        error_ += message;
+    openResultFile(true, extension);
+}
+void Backend::openResultFile(bool task, const QString& extension) {
+    const auto directory = task ? result_ : selected_;
+    const auto generation = task ? taskGeneration_ : selectionGeneration_;
+    const auto request = task ? ++taskOpenRequest_ : ++resultOpenRequest_;
+    auto& error = task ? taskOpenError_ : resultOpenError_;
+    const auto [path, validation] = resultFile(directory, extension);
+    error = validation;
+    emit changed();
+    if (!validation.isEmpty()) return;
+    desktop_->open(task ? 1 : 0, QUrl::fromLocalFile(path), [this, task, generation, request, directory](const UiText& message) {
+        if (closing_ || generation != (task ? taskGeneration_ : selectionGeneration_) ||
+            request != (task ? taskOpenRequest_ : resultOpenRequest_) || directory != (task ? result_ : selected_)) return;
+        (task ? taskOpenError_ : resultOpenError_) = message;
         emit changed();
-    }
+    });
 }
 void Backend::downloadModel(const QString& selection) {
     if (!busy()) {

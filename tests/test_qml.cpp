@@ -286,13 +286,13 @@ private slots:
         source->forceActiveFocus();
         QTRY_VERIFY(source->hasActiveFocus());
         backend.openTaskResult(); // A cached application-owned diagnostic.
-        QVERIFY(backend.error().contains("Каталог"));
+        QVERIFY(backend.taskOpenError().contains("Каталог"));
         backend.history()->replace({{"Лекция 😀", "completed", "medium", temp.path(), "2026-10-12", true}});
         QSignalSpy historyChanged(backend.history(), &QAbstractItemModel::dataChanged);
         backend.language()->setSelection("en");
         QTRY_COMPARE(source->property("placeholderText").toString(), QString("Paste a URL or select a file"));
         QCOMPARE(backend.status(), QString("No task started"));
-        QCOMPARE(backend.error(), QString("The result directory has not been created yet"));
+        QCOMPARE(backend.taskOpenError(), QString("The result directory has not been created yet"));
         QCOMPARE(backend.history()->data(backend.history()->index(0), HistoryModel::Status).toString(), QString("Completed"));
         QCOMPARE(source->property("text").toString(), QString("Лекция %1 😀"));
         QVERIFY(source->hasActiveFocus());
@@ -300,7 +300,7 @@ private slots:
         QCOMPARE(picker->property("currentIndex").toInt(), 2);
         backend.language()->setSelection("ru");
         QTRY_COMPARE(source->property("placeholderText").toString(), QString("Вставьте URL или выберите файл"));
-        QVERIFY(backend.error().contains("Каталог"));
+        QVERIFY(backend.taskOpenError().contains("Каталог"));
         QCOMPARE(source->property("text").toString(), QString("Лекция %1 😀"));
     }
     void windowLoadsAndKeyboardFocusWorks() {

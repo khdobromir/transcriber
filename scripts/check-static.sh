@@ -15,6 +15,8 @@ checker="${CPPCHECK:-cppcheck}"
 shellcheck --version
 bash -n install.sh scripts/*.sh
 shellcheck -x install.sh scripts/*.sh
+sh -n packaging/linux/AppRun
+shellcheck -s sh packaging/linux/AppRun
 # Both analyzers use only owned TUs; generated/vendor TUs are excluded.
 static_dir="$(mktemp -d "${TMPDIR:-/tmp}/transcribe-static.XXXXXX")"
 trap 'rm -rf -- "$static_dir"' EXIT
