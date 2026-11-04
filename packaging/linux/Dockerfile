@@ -3,7 +3,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Refresh preinstalled runtime libraries too, so matching sources remain available
 # in the same authenticated deb-src indexes used for the retained source offer.
 RUN sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources \
-    && apt-get update && apt-get install -y --no-install-recommends \
+    && apt-get update && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends \
     ca-certificates cmake g++ git make python3 python3-venv curl file binutils \
     patchelf desktop-file-utils ffmpeg shellcheck fonts-dejavu-core \
     libgl-dev libglx-dev libopengl-dev libegl-dev libxkbcommon0 libxkbcommon-x11-0 \
