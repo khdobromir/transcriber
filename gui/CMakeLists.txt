@@ -148,10 +148,25 @@ if(BUILD_TESTING)
         set(qml_test_theme windows)
     endif()
     set_tests_properties(gui_theme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=${qml_test_platform};QT_QPA_PLATFORMTHEME=${qml_test_theme}")
-    add_test(NAME gui_qml COMMAND test_qml -o "${CMAKE_BINARY_DIR}/Testing/Temporary/gui_qml.log,txt")
-    set_tests_properties(gui_qml PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=${qml_test_platform};QT_QUICK_BACKEND=software;QT_QPA_PLATFORMTHEME=${qml_test_theme}" TIMEOUT 30 LABELS gui)
+    set(qml_scenarios
+        minimumWindowAndPalettes
+        responsiveNavigationAndThemePreserveDraft
+        materialComponentStates
+        liveLanguagePreservesWindowAndMessages
+        windowLoadsAndKeyboardFocusWorks
+        closingModelInstallationIsAsynchronous
+        closingActiveTaskRequiresConfirmation)
+    foreach(scenario IN LISTS qml_scenarios)
+        add_test(NAME gui_qml_${scenario} COMMAND test_qml ${scenario}
+            -o "${CMAKE_BINARY_DIR}/Testing/Temporary/gui_qml_${scenario}.log,txt" -v2)
+        set_tests_properties(gui_qml_${scenario} PROPERTIES TIMEOUT 30 LABELS gui
+            ENVIRONMENT "QT_QPA_PLATFORM=${qml_test_platform};QT_QUICK_BACKEND=software;QT_QPA_PLATFORMTHEME=${qml_test_theme}")
+    endforeach()
+    add_test(NAME gui_qml_registration COMMAND ${Python3_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/tests/check_qml_registration.py $<TARGET_FILE:test_qml> ${qml_scenarios})
+    set_tests_properties(gui_qml_registration PROPERTIES TIMEOUT 30 LABELS "gui;unit"
+        ENVIRONMENT "QT_QPA_PLATFORM=${qml_test_platform};QT_QUICK_BACKEND=software;QT_QPA_PLATFORMTHEME=${qml_test_theme}")
     # The large-text reading regression has its own process and timeout budget.
-    # Keep the general layout/keyboard suite at its existing 30-second limit.
     add_test(NAME gui_transcript_view COMMAND test_transcript_view
         -o "${CMAKE_BINARY_DIR}/Testing/Temporary/gui_transcript_view.log,txt")
     set_tests_properties(gui_transcript_view PROPERTIES TIMEOUT 60 LABELS gui

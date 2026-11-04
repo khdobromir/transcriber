@@ -202,9 +202,12 @@ Latin primary font delegates Cyrillic to another installed or bundled font. A lo
 Bitstream Vera primary-font reproducer fails the old check; the shaping check
 accepts working fallback and rejects the same font with fallback disabled.
 
-Windows Debug passed the large transcript reading regression, then reached the
-30-second aggregate `gui_qml` limit during the following responsive-layout test.
-The unchanged transcript regression now runs as `gui_transcript_view` in a separate
-process with its own 60-second budget. The existing general QML suite retains its
-30-second limit and all layout/theme/keyboard/lifecycle assertions. Both tests
-use the same native Windows platform/theme and deployed runtime.
+Windows Debug exposed an insufficient aggregate QML timeout. The large transcript
+regression passes independently and retains its unchanged assertions in
+`gui_transcript_view` with a 60-second budget. The remaining general QML scenarios
+also pass their earlier checks before the combined 30-second process limit is
+reached. They now run in separate CTest processes with 30 seconds per scenario,
+including all data rows. Discovery/registration comparison rejects missing or
+duplicate scenarios. Native Windows platform/theme, runtime deployment, catalogs,
+DPI variants and every original assertion remain enabled; verbose per-scenario
+logs identify the exact failing check if a scenario itself stalls.
