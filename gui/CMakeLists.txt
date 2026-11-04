@@ -80,8 +80,10 @@ if(BUILD_TESTING)
         qt_add_executable(test_font_probe ../tests/font_probe.cpp)
         target_link_libraries(test_font_probe PRIVATE transcribe_gui_logic)
         transcribe_warnings(test_font_probe)
+        find_file(TRANSCRIBE_TEST_FONT DejaVuSans.ttf
+            PATHS /usr/share/fonts/truetype/dejavu /usr/share/fonts/TTF /usr/share/fonts/dejavu REQUIRED)
         add_test(NAME gui_portable_fonts COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/tests/check_portable_fonts.py
-            $<TARGET_FILE:test_font_probe> ${Fontconfig_LIBRARY} ${PROJECT_SOURCE_DIR}/packaging/linux/fonts.conf)
+            $<TARGET_FILE:test_font_probe> ${Fontconfig_LIBRARY} ${PROJECT_SOURCE_DIR}/packaging/linux/fonts.conf ${TRANSCRIBE_TEST_FONT})
         set_tests_properties(gui_portable_fonts PROPERTIES TIMEOUT 60 LABELS "gui;unit")
     endif()
     add_test(NAME gui_translations COMMAND ${Python3_EXECUTABLE}

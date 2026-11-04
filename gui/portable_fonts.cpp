@@ -38,7 +38,11 @@ bool initializePortableFonts() {
     if (!config) throw std::runtime_error("Portable Fontconfig initialization failed: cannot create config");
     FcConfigSetSysRoot(config.get(), nullptr);
     const auto filename = path.toUtf8();
+    // Fontconfig 2.15 leaks the resolved filename for an XML relative prefix.
+    // Register the relocatable bundled fonts directly instead.
+    const auto fonts = (root + "/usr/share/fonts").toUtf8();
     if (!FcConfigParseAndLoad(config.get(), reinterpret_cast<const FcChar8*>(filename.constData()), FcTrue) ||
+        !FcConfigAppFontAddDir(config.get(), reinterpret_cast<const FcChar8*>(fonts.constData())) ||
         !FcConfigSetCurrent(config.get()))
         throw std::runtime_error("Portable Fontconfig initialization failed: cannot load private config");
     portableInitialized = true;

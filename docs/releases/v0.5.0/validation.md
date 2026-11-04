@@ -178,3 +178,20 @@ Pushes to master now enable real smoke in CI (installed Linux and Windows ZIP),
 Linux portable (including offline Ubuntu/Debian) and Real Whisper smoke. Manual
 dispatch remains available and the weekly Real Whisper schedule is unchanged.
 Do not manually redispatch the automatic final-master runs.
+
+## Final CI corrections
+
+Final PR CI found a deprecated Qt exception assertion; the desktop regression now
+uses `QVERIFY_THROWS_EXCEPTION` with the same exception/operation. Clang with
+warnings as errors verifies the actual test translation unit.
+
+The portable font fixture now includes DejaVu Sans and sets `QT_QPA_FONTDIR`, as
+the actual AppRun does; official Qt offscreen builds must not depend on host font
+discovery. GUI CI explicitly installs that test prerequisite.
+
+LeakSanitizer reproduced a Fontconfig 2.15 allocation leak in the XML relative
+prefix handler. The retained exact upstream source shows that the resolved
+filename is not freed on success. Removing that XML prefix eliminates the leak;
+startup registers the relocated bundle font directory using `FcConfigAppFontAddDir`
+instead. Leak detection remains enabled; no suppression was added. Final CI and
+package checks cover this correction under the final release identity.

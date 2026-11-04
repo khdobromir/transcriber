@@ -106,3 +106,8 @@ support an isolated installation; preserve the data override at runtime. Existin
 changed/wrong-revision engine sources are rejected instead of overwritten.
 Each binary rename is atomic, but engine/CLI/default-model replacement is not one
 transaction. Use a separate data/bin directory when testing upgrades.
+
+Linux GUI tests require DejaVu Sans (`fonts-dejavu-core` on Ubuntu/Debian).
+The isolated font fixture copies that font into its temporary bundle and sets
+`QT_QPA_FONTDIR`, matching AppRun without relying on the host Qt font database.
+For another font location, configure `-DTRANSCRIBE_TEST_FONT=/path/to/DejaVuSans.ttf`.

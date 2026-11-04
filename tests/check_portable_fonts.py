@@ -8,7 +8,7 @@ import subprocess
 import sys
 import tempfile
 
-probe, library, config = map(Path, sys.argv[1:])
+probe, library, config, font = map(Path, sys.argv[1:])
 with tempfile.TemporaryDirectory(prefix="transcribe-fonts-") as temporary:
     root = Path(temporary) / "Комплект 😀"
     tools = root / "usr/bin/tools"
@@ -22,12 +22,17 @@ with tempfile.TemporaryDirectory(prefix="transcribe-fonts-") as temporary:
     private = root / "usr/share/transcribe/fonts.conf"
     private.parent.mkdir(parents=True)
     shutil.copy2(config, private)
+    fonts = root / "usr/share/fonts"
+    fonts.mkdir()
+    shutil.copy2(font, fonts / font.name)
     output = Path(temporary) / "fonts.json"
     env = dict(os.environ, TRANSCRIBE_PORTABLE_ROOT=str(root), TRANSCRIBE_PORTABLE_DIAGNOSTICS=str(output),
                LD_LIBRARY_PATH=str(libraries), QT_QPA_PLATFORM="offscreen", QT_QPA_PLATFORMTHEME="generic",
+               QT_QPA_FONTDIR=str(fonts),
                XDG_CACHE_HOME=temporary + "/cache", XDG_CONFIG_HOME=temporary + "/config")
     result = subprocess.run([str(probe)], env=env, capture_output=True, timeout=30)
-    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    assert result.returncode == 0, (result.stderr.decode(errors="replace")
+                                    + "\nFont report: " + (output.read_text() if output.exists() else "missing"))
     assert b"Fontconfig warning" not in result.stderr and b"Fontconfig error" not in result.stderr, result.stderr
     report = json.loads(output.read_text())
     assert report["portable_fontconfig"] and report["bundled_fontconfig"] and report["cyrillic"], report
