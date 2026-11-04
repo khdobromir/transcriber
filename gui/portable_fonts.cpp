@@ -8,7 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QRawFont>
+#include <QTextLayout>
 #include <QSaveFile>
 #include <fontconfig/fontconfig.h>
 #include <dlfcn.h>
@@ -54,11 +54,23 @@ void writePortableFontDiagnostics() {
     const auto root = portable::root();
     if (root.isEmpty() || !portableInitialized) throw std::runtime_error("Portable font diagnostics require portable initialization");
     const auto library = loadedFontconfig();
-    const auto font = QRawFont::fromFont(QGuiApplication::font());
-    bool cyrillic = font.isValid();
-    for (char32_t character = U'А'; character <= U'я'; ++character)
-        cyrillic = cyrillic && font.supportsCharacter(static_cast<uint>(character));
-    cyrillic = cyrillic && font.supportsCharacter(uint{0x0401}) && font.supportsCharacter(uint{0x0451});
+    const auto font = QGuiApplication::font();
+    QString sample;
+    for (char16_t character = u'А'; character <= u'я'; ++character) sample += QChar(character);
+    sample += QChar(u'Ё');
+    sample += QChar(u'ё');
+    bool cyrillic = true;
+    for (const auto character : sample) {
+        // Verify actual Qt shaping, including fallback from a Latin-only default.
+        QTextLayout layout(QString(character), font);
+        layout.beginLayout();
+        (void)layout.createLine();
+        layout.endLayout();
+        bool supported = false;
+        for (const auto& run : layout.glyphRuns())
+            for (const auto glyph : run.glyphIndexes()) supported = supported || glyph != 0;
+        cyrillic = cyrillic && supported;
+    }
     const bool bundled = library.startsWith(root + "/usr/lib/");
     QFile loaded(library);
     if (!loaded.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot inspect loaded Fontconfig");
@@ -75,7 +87,7 @@ void writePortableFontDiagnostics() {
                 entry.value("sha256").toString() == digest) manifestMatch = true;
         }
     }
-    const QJsonObject report{{"portable_fontconfig", true}, {"bundled_fontconfig", bundled}, {"fontconfig_library", library}, {"fontconfig_version", FcGetVersion()}, {"bundle_root", root}, {"fontconfig_sha256", digest}, {"fontconfig_manifest_match", manifestMatch}, {"config", root + "/usr/share/transcribe/fonts.conf"}, {"cyrillic", cyrillic}};
+    const QJsonObject report{{"portable_fontconfig", true}, {"bundled_fontconfig", bundled}, {"fontconfig_library", library}, {"fontconfig_version", FcGetVersion()}, {"bundle_root", root}, {"fontconfig_sha256", digest}, {"fontconfig_manifest_match", manifestMatch}, {"config", root + "/usr/share/transcribe/fonts.conf"}, {"cyrillic", cyrillic}, {"default_font", font.family()}, {"cyrillic_check", "Qt text shaping with fallback"}};
     QSaveFile file(output);
     const auto bytes = QJsonDocument(report).toJson(QJsonDocument::Compact) + '\n';
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())

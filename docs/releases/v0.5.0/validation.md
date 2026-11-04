@@ -195,3 +195,9 @@ filename is not freed on success. Removing that XML prefix eliminates the leak;
 startup registers the relocated bundle font directory using `FcConfigAppFontAddDir`
 instead. Leak detection remains enabled; no suppression was added. Final CI and
 package checks cover this correction under the final release identity.
+
+The font diagnostic checks each Cyrillic letter through Qt text shaping, including
+font fallback. Checking only the default QRawFont incorrectly rejected hosts whose
+Latin primary font delegates Cyrillic to another installed or bundled font. A local
+Bitstream Vera primary-font reproducer fails the old check; the shaping check
+accepts working fallback and rejects the same font with fallback disabled.
