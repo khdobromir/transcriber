@@ -24,7 +24,7 @@ jobs:
           persist-credentials: false
       - name: Build and verify one final AppImage
         env:
-          REAL_SMOKE: ${{ github.event_name == 'workflow_dispatch' && inputs.real_smoke }}
+          REAL_SMOKE: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && inputs.real_smoke) }}
         run: |
           options=(--release --result-file /output/candidate.json)
           if [ "$REAL_SMOKE" = true ]; then options+=(--real-smoke); fi

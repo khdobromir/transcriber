@@ -209,7 +209,7 @@ jobs:
           cmake --install "$RUNNER_TEMP/transcribe-gui-build" --prefix "$prefix"
           LD_LIBRARY_PATH="$qt_root/lib" QT_PLUGIN_PATH="$qt_root/plugins" QML_IMPORT_PATH="$qt_root/qml" python tests/smoke_linux_install.py "$prefix"
       - name: Candidate real Whisper and installed GUI smoke
-        if: github.event_name == 'workflow_dispatch' && inputs.real_smoke && matrix.qt == '6.8.3'
+        if: ((github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && inputs.real_smoke)) && matrix.qt == '6.8.3'
         run: |
           engine_source="$RUNNER_TEMP/candidate-whisper"
           git init "$engine_source"
@@ -345,7 +345,7 @@ jobs:
           }
       - name: Build, test, deploy and smoke package
         run: |
-          $RealSmoke = ("${{ github.event_name }}" -eq 'workflow_dispatch') -and ("${{ inputs.real_smoke }}" -eq 'true')
+          $RealSmoke = "${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && inputs.real_smoke) }}" -eq 'true'
           ./scripts/package-windows.ps1 -QtRoot "$env:RUNNER_TEMP/Qt/6.8.3/msvc2022_64" -WorkDirectory "$env:RUNNER_TEMP/transcribe-package" -Destination "$env:RUNNER_TEMP/transcribe-artifacts" -Release -RealSmoke:$RealSmoke
       - name: Retain tested ZIP, build inputs and validation
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
