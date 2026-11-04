@@ -61,7 +61,7 @@ jobs:
         run: runuser -u tester -- ctest --test-dir /tmp/transcribe-build -R '^pipeline$' --repeat until-fail:20 --output-on-failure
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-linux-${{ matrix.compiler }}
           path: /tmp/transcribe-build/Testing/Temporary/*.log
@@ -93,7 +93,7 @@ jobs:
           runuser -u tester -- ctest --test-dir /tmp/transcribe-build --output-on-failure
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-debian
           path: /tmp/transcribe-build/Testing/Temporary/*.log
@@ -135,7 +135,7 @@ jobs:
         run: runuser -u tester -- bash scripts/check-static.sh /tmp/transcribe-build
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-static
           path: /tmp/transcribe-build/compile_commands.json
@@ -165,7 +165,7 @@ jobs:
           runuser -u tester -- ctest --test-dir /tmp/transcribe-build --output-on-failure
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-arch
           path: /tmp/transcribe-build/Testing/Temporary/*.log
@@ -229,7 +229,7 @@ jobs:
         run: bash scripts/check-static.sh "$RUNNER_TEMP/transcribe-gui-build"
       - name: Retain GUI test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: gui-logs-qt-${{ matrix.qt }}
           path: |
@@ -275,7 +275,7 @@ jobs:
         run: ctest --test-dir "$RUNNER_TEMP/transcribe-sanitizers" --output-on-failure
       - name: Retain sanitizer diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sanitizer-logs
           path: |
@@ -305,7 +305,7 @@ jobs:
           }
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-windows
           path: out/build/windows-cli-*/Testing/Temporary/*.log
@@ -348,7 +348,7 @@ jobs:
           $RealSmoke = "${{ (github.event_name == 'push' && github.ref == 'refs/heads/master') || (github.event_name == 'workflow_dispatch' && inputs.real_smoke) }}" -eq 'true'
           ./scripts/package-windows.ps1 -QtRoot "$env:RUNNER_TEMP/Qt/6.8.3/msvc2022_64" -WorkDirectory "$env:RUNNER_TEMP/transcribe-package" -Destination "$env:RUNNER_TEMP/transcribe-artifacts" -Release -RealSmoke:$RealSmoke
       - name: Retain tested ZIP, build inputs and validation
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Transcribe-windows-x64
           path: ${{ runner.temp }}/transcribe-artifacts/*
@@ -356,7 +356,7 @@ jobs:
           retention-days: 14
       - name: Retain test diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: logs-windows-package
           path: |
