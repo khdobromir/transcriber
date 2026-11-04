@@ -219,3 +219,13 @@ indexes before installing build dependencies. An isolated copy of that exact bas
 reproduced the unavailable old source, completed the upgrade to 10.42-4ubuntu2.2,
 and passed exact-version source selection afterward. No nearest-version fallback,
 source checksum relaxation or manual final-master workflow repeat was used.
+
+The next automatic master CI exposed a separate hosted-runner download issue:
+Azure's Ubuntu mirror took almost 25 minutes to serve 111 MB in the sanitizer
+job, while the Qt 6.11.2 job never reached its build before the 30-minute limit.
+The sanitizer scenarios passed, but the job timed out while retaining reports.
+The two affected dependency steps now remove that Azure mirror from the runner's
+mirror list, retaining the authenticated Ubuntu archive/security fallbacks, and
+install only required packages. This addresses the slow-transfer case tracked in
+[runner-images #14823](https://github.com/actions/runner-images/issues/14823).
+Job budgets, test scenarios, static analysis and leak detection are unchanged.
