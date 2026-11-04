@@ -131,3 +131,8 @@ extension, malformed fields, size limits, old events and unchanged Russian CLI
 output. Native OS dialogs and external-tool/OS diagnostic details may retain
 their original language; transcript content is never translated. These tests use
 fixtures and do not establish native desktop acceptance or ASR accuracy.
+
+`gui_transcript_view` runs the large streaming/reading/selection regression in its
+own process with a 60-second budget. `gui_qml` retains its 30-second layout, theme,
+keyboard and lifecycle suite; neither set of assertions is skipped. This keeps
+the combined Windows Debug workload from exhausting one shared CTest timeout.

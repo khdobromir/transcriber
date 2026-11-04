@@ -201,3 +201,10 @@ font fallback. Checking only the default QRawFont incorrectly rejected hosts who
 Latin primary font delegates Cyrillic to another installed or bundled font. A local
 Bitstream Vera primary-font reproducer fails the old check; the shaping check
 accepts working fallback and rejects the same font with fallback disabled.
+
+Windows Debug passed the large transcript reading regression, then reached the
+30-second aggregate `gui_qml` limit during the following responsive-layout test.
+The unchanged transcript regression now runs as `gui_transcript_view` in a separate
+process with its own 60-second budget. The existing general QML suite retains its
+30-second limit and all layout/theme/keyboard/lifecycle assertions. Both tests
+use the same native Windows platform/theme and deployed runtime.
