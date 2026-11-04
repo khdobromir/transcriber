@@ -165,6 +165,49 @@ struct ModelServer {
 class GuiTests : public QObject {
     Q_OBJECT
 private slots:
+    void etaPresentationCadenceRoundingStallAndRecovery() {
+        Fixture fixture;
+        Backend backend({"missing", fixture.ini, fixture.root});
+        backend.initializeLanguage();
+        backend.language()->setSelection("ru");
+        EtaPresentation eta;
+        const auto start = EtaPresentation::Clock::time_point{};
+        const auto at = [&](int seconds) { return start + std::chrono::seconds(seconds); };
+        eta.observe(0, {}, at(0));
+        QCOMPARE(eta.text(), QString("Оценка времени рассчитывается…"));
+        eta.observe(0.1, 900, at(4));
+        QCOMPARE(eta.text(), QString("Оценка времени рассчитывается…"));
+        eta.observe(0.2, 721, at(5));
+        QCOMPARE(eta.text(), QString("Осталось примерно 13 мин"));
+        for (int i = 1; i < 25; ++i)
+            eta.observe(0.2, 30, at(5) + std::chrono::milliseconds(200 * i));
+        QCOMPARE(eta.text(), QString("Осталось примерно 13 мин"));
+        eta.observe(0.3, 36, at(10));
+        QCOMPARE(eta.text(), QString("Осталось примерно 40 с"));
+        eta.observe(0.4, 3599, at(15));
+        QCOMPARE(eta.text(), QString("Осталось примерно 1 ч 0 мин"));
+        eta.observe(0.5, 3601, at(20));
+        QCOMPARE(eta.text(), QString("Осталось примерно 1 ч 1 мин"));
+        eta.observe(0.6, 0, at(25));
+        QCOMPARE(eta.text(), QString("Осталось примерно 5 с"));
+        eta.observe(0.6, 25, at(30));
+        QCOMPARE(eta.text(), QString("Осталось примерно 25 с"));
+        QVERIFY(eta.refresh(at(55)));
+        QCOMPARE(eta.text(), QString("Уточняем оставшееся время…"));
+        eta.observe(0.7, 120, at(60));
+        QCOMPARE(eta.text(), QString("Оценка времени рассчитывается…"));
+        eta.refresh(at(65));
+        QCOMPARE(eta.text(), QString("Оценка времени рассчитывается…"));
+        eta.observe(0.8, 120, at(70));
+        QCOMPARE(eta.text(), QString("Осталось примерно 2 мин"));
+        backend.language()->setSelection("en");
+        QCOMPARE(eta.text(), QString("Approximately 2 min remaining"));
+        eta.reset();
+        QVERIFY(eta.text().isEmpty());
+        eta.observe(0, {}, at(71));
+        QCOMPARE(eta.text(), QString("Estimating remaining time…"));
+        backend.language()->setSelection("ru");
+    }
     void languageResolutionAndPersistence() {
         QCOMPARE(LanguageController::resolve("auto", QLocale("ru_RU")), QString("ru"));
         QCOMPARE(LanguageController::resolve("auto", QLocale("en_US")), QString("en"));
@@ -269,9 +312,11 @@ private slots:
         QVERIFY(backend.busy());
         QTRY_COMPARE_WITH_TIMEOUT(backend.progress(), 1.0, 3000);
         QVERIFY(backend.busy()); // Barrier holds publication after 100% recognition.
+        QVERIFY(!backend.eta().isEmpty());
         put(release, "ready");
         QTRY_VERIFY_WITH_TIMEOUT(!backend.busy(), 3000);
         QCOMPARE(backend.status(), QString("Готово"));
+        QVERIFY(backend.eta().isEmpty());
         QVERIFY(backend.error().isEmpty());
         QTRY_VERIFY_WITH_TIMEOUT(backend.history()->rowCount() == 1, 3000);
         backend.start(fixture.temp.path() + "/input.wav", fixture.options());
@@ -299,7 +344,9 @@ private slots:
         Backend backend({QCoreApplication::applicationFilePath(), fixture.ini, fixture.root});
         backend.start(fixture.temp.path() + "/input.wav", fixture.options());
         QTRY_VERIFY_WITH_TIMEOUT(!backend.resultDirectory().isEmpty(), 3000);
+        QTRY_VERIFY(!backend.eta().isEmpty());
         backend.cancel();
+        QVERIFY(backend.eta().isEmpty());
         QTRY_VERIFY_WITH_TIMEOUT(!backend.busy(), 3000);
         QCOMPARE(backend.status(), QString("Прервано"));
         QVERIFY(QFile::exists(backend.resultDirectory() + "/transcripts/transcript.txt"));

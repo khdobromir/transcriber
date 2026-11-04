@@ -9,19 +9,19 @@ Use the native desktop GUI or the independent CLI to produce TXT, SRT and VTT.
 Recognition runs locally through whisper.cpp; URL downloads use yt-dlp and media
 conversion uses FFmpeg. Current source provides Russian and English GUI languages,
 with automatic selection and instant switching. Recognition remains Russian;
-the independent CLI retains its Russian console interface. The v0.5.0-beta.1
-prerelease adds a Material You / Material 3 interface, wallpaper/image palettes
-and adaptive navigation. Manual Windows acceptance remains open; v0.4.1 stays stable.
+the independent CLI retains its Russian console interface. The v0.5.0 source
+includes a Material You / Material 3 interface, wallpaper/image palettes and
+adaptive navigation. The user confirmed Windows acceptance of the beta and the
+transcript/ETA fixes. v0.5.0 also fixes Linux AppImage result opening and Fontconfig initialization.
 
 **C++23 · Qt Quick / QML · CMake · Linux / Windows · CPU-only**
 
-[Download v0.4.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.4.1)
-· [Beta v0.5.0-beta.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.5.0-beta.1)
+[Download v0.5.0](https://github.com/khdobromir/transcriber/releases/tag/v0.5.0)
 · [Changelog](CHANGELOG.md) · [Documentation](docs/README.md)
 · [Contributing](CONTRIBUTING.md)
 
-See the [beta release notes](docs/releases/v0.5.0-beta.1/notes.md) and
-[verification scope](docs/releases/v0.5.0-beta.1/validation.md).
+See the [v0.5.0 release notes](docs/releases/v0.5.0/notes.md) and
+[verification scope and evidence](docs/releases/v0.5.0/validation.md).
 
 ## Demo
 
@@ -33,7 +33,7 @@ The screenshot shows the previous Russian interface.
 
 ```sh
 transcribe --version
-# transcribe 0.5.0-beta.1 (current source)
+# transcribe 0.5.0 (current source)
 transcribe --model small "lecture.wav"
 transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 ```
@@ -45,6 +45,8 @@ The last two examples require installed tools/models and your own media file.
 
 - Local audio/video files and one URL supported by the installed yt-dlp.
 - Live partial text, progress and estimated remaining recognition time.
+- Preserve the reading position and text selection; follow at the bottom or use **Jump to new text**.
+- Smoothed, rounded remaining-time estimates updated once every five seconds.
 - TXT, SRT and VTT exports with one result directory per run.
 - Cancellation, preserved partial results and per-tool diagnostic logs.
 - Model download/import with SHA-256 verification; small, medium and turbo presets.
@@ -56,7 +58,7 @@ The last two examples require installed tools/models and your own media file.
 
 [English guide](docs/user/quick-start.md) · [Краткая инструкция на русском](docs/user/ru/quick-start.md)
 
-1. Download the application from [Releases](https://github.com/khdobromir/lecture-transcriber/releases/latest) and compare its SHA-256 with the digest shown for that asset.
+1. Download the application from [Releases](https://github.com/khdobromir/transcriber/releases/latest) and compare its SHA-256 with the digest shown for that asset.
 2. Linux: make the AppImage executable and launch it. Windows: extract the **whole**
    ZIP and launch `bin/transcribe-gui.exe`.
 3. Open **Models / Модели**, download or import a recognition model and Silero VAD.
@@ -80,7 +82,7 @@ URL downloads and downloading models need network access; local recognition does
 
 | Route | Supported target | Application dependencies |
 |---|---|---|
-| Linux AppImage | x86_64, glibc 2.39+; local beta acceptance on Omarchy / Wayland | Qt, CPU Whisper, FFmpeg and standalone yt-dlp included |
+| Linux AppImage | x86_64, glibc 2.39+; candidate acceptance on Omarchy / Wayland | Qt, CPU Whisper, FFmpeg and standalone yt-dlp included |
 | Windows ZIP | Windows 11 x64 | Qt, CPU Whisper, FFmpeg, standalone yt-dlp and runtime included |
 | Linux source installer | C++23 toolchain and CLI prerequisites | Builds the CLI and CPU engine; uses system FFmpeg/yt-dlp |
 | Developer build | Linux/Windows; optional Qt GUI | [Build requirements and commands](docs/build/from-source.md) |
@@ -92,8 +94,8 @@ macOS, ARM and musl/Alpine are outside the current package support.
 For the Linux CLI source installer, after installing the prerequisites:
 
 ```sh
-git clone https://github.com/khdobromir/lecture-transcriber.git
-cd lecture-transcriber
+git clone https://github.com/khdobromir/transcriber.git
+cd transcriber
 bash install.sh small
 export PATH="$HOME/.local/bin:$PATH"
 transcribe --help

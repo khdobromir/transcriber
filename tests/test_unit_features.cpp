@@ -65,6 +65,29 @@ int main() {
         CHECK(!eta.update(std::numeric_limits<double>::quiet_NaN(), start));
         CHECK(eta_text({}) == "ETA: расчёт…" && eta_text(65) == "ETA ≈ 01:05");
     });
+    suite.add("eta_ignores_event_frequency_between_samples", [] {
+        const auto start = Eta::Clock::time_point{};
+        Eta frequent(start), sparse(start);
+        for (auto* eta : {&frequent, &sparse}) {
+            CHECK(!eta->update(0.1, start + std::chrono::seconds(2)));
+            CHECK(eta->update(0.2, start + std::chrono::seconds(10)) == 40);
+        }
+        for (int i = 1; i < 25; ++i)
+            CHECK(frequent.update(0.2, start + std::chrono::seconds(10) + std::chrono::milliseconds(200 * i)) == 40);
+        CHECK(frequent.update(0.3, start + std::chrono::seconds(15)) == sparse.update(0.3, start + std::chrono::seconds(15)));
+    });
+    suite.add("eta_tracks_speed_changes_and_sustained_stalls", [] {
+        const auto start = Eta::Clock::time_point{};
+        Eta eta(start);
+        CHECK(!eta.update(0.02, start + std::chrono::seconds(2)));
+        CHECK(eta.update(0.1, start + std::chrono::seconds(10)) == 90);
+        CHECK(eta.update(0.15, start + std::chrono::seconds(15)) == 85);
+        const auto faster = eta.update(0.5, start + std::chrono::seconds(20));
+        CHECK(faster && *faster > 0 && *faster < 80);
+        const auto stalled = eta.update(0.5, start + std::chrono::seconds(100));
+        CHECK(stalled && *stalled > *faster);
+        CHECK(eta.update(1, start + std::chrono::seconds(101)) == 0);
+    });
     suite.add("cache_roundtrip_offline_alias_authentication_and_copy_isolation", [] {
         CacheFixture f;
         MediaCache cache(f.root, 8);

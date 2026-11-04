@@ -17,6 +17,8 @@ private:
     double fraction_ = 0;
     unsigned updates_ = 0;
     std::optional<double> estimate_;
+    std::optional<double> finish_;
+    Clock::time_point sampled_{};
 };
 std::string eta_text(std::optional<double> seconds);
 class Progress {

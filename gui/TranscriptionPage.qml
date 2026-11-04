@@ -120,6 +120,7 @@ ScrollView {
                                 UiTextArea { id: taskMessage; objectName: "taskError"; text: page.backend.error; readOnly: true; selectByMouse: true; wrapMode: TextEdit.Wrap; textFormat: TextEdit.PlainText; Accessible.name: qsTr("Ошибка текущей задачи") }
                             }
                             Label { text: qsTr("Предупреждение задачи: %1").arg(page.backend.warning); visible: page.backend.warning.length > 0; wrapMode: Text.WordWrap; Layout.fillWidth: true; textFormat: Text.PlainText }
+                            Label { objectName: "taskOpenError"; text: page.backend.taskOpenError; visible: text.length > 0; wrapMode: Text.WordWrap; Layout.fillWidth: true; textFormat: Text.PlainText }
                             UiProgress { Layout.fillWidth: true; indeterminate: page.backend.progress < 0; value: page.backend.progress; visible: page.backend.busy; Accessible.name: qsTr("Прогресс распознавания") }
                             Label { text: page.backend.eta; visible: text.length > 0 && page.backend.busy }
                             Flow {
@@ -153,22 +154,13 @@ ScrollView {
                                 UiButton { text: qsTr("Журналы"); onClicked: page.backend.openResult("logs") }
                             }
                             Label { text: page.backend.previewError; visible: text.length > 0; textFormat: Text.PlainText; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+                            Label { objectName: "resultOpenError"; text: page.backend.resultOpenError; visible: text.length > 0; textFormat: Text.PlainText; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                         }
                     }
                     Label { text: qsTr("Текст расшифровки"); font.bold: true }
-                    Label { text: page.backend.transcriptNotice; visible: text.length > 0; wrapMode: Text.WordWrap; Layout.fillWidth: true }
-                    ScrollView {
+                    TranscriptView {
+                        backend: page.backend
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 260
-                        UiTextArea {
-                            text: page.backend.transcript
-                            readOnly: true
-                            selectByMouse: true
-                            wrapMode: TextEdit.Wrap
-                            textFormat: TextEdit.PlainText
-                            placeholderText: qsTr("Текст появится во время распознавания. Полный результат сохраняется в TXT.")
-                            Accessible.name: qsTr("Частичный текст расшифровки")
-                        }
                     }
         }
     }

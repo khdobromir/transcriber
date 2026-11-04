@@ -1,10 +1,35 @@
 #!/bin/sh
 set -eu
-app_root=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+case "$0" in */*) app_parent=${0%/*} ;; *) app_parent=. ;; esac
+app_root=$(CDPATH='' cd -- "$app_parent" && pwd)
 if [ ! -f "$app_root/usr/bin/tools/.transcribe-bundle" ]; then
     printf 'Повреждён переносимый комплект Transcribe. Замените файл приложения.\n' >&2
     exit 1
 fi
+save_environment() {
+    export "TRANSCRIBE_PORTABLE_ENV_$1_SET=$2"
+    export "TRANSCRIBE_PORTABLE_ENV_$1_VALUE=$3"
+}
+if [ "${TRANSCRIBE_PORTABLE_SNAPSHOT_VERSION-}" != 1 ]; then
+    save_environment LD_LIBRARY_PATH "${LD_LIBRARY_PATH+x}" "${LD_LIBRARY_PATH-}"
+    save_environment QT_PLUGIN_PATH "${QT_PLUGIN_PATH+x}" "${QT_PLUGIN_PATH-}"
+    save_environment QML_IMPORT_PATH "${QML_IMPORT_PATH+x}" "${QML_IMPORT_PATH-}"
+    save_environment QML2_IMPORT_PATH "${QML2_IMPORT_PATH+x}" "${QML2_IMPORT_PATH-}"
+    save_environment FONTCONFIG_FILE "${FONTCONFIG_FILE+x}" "${FONTCONFIG_FILE-}"
+    save_environment QT_QPA_FONTDIR "${QT_QPA_FONTDIR+x}" "${QT_QPA_FONTDIR-}"
+    save_environment TRANSCRIBE_CA_BUNDLE "${TRANSCRIBE_CA_BUNDLE+x}" "${TRANSCRIBE_CA_BUNDLE-}"
+    save_environment QT_QPA_PLATFORMTHEME "${QT_QPA_PLATFORMTHEME+x}" "${QT_QPA_PLATFORMTHEME-}"
+    save_environment QT_QUICK_BACKEND "${QT_QUICK_BACKEND+x}" "${QT_QUICK_BACKEND-}"
+    save_environment QT_QPA_PLATFORM_PLUGIN_PATH "${QT_QPA_PLATFORM_PLUGIN_PATH+x}" "${QT_QPA_PLATFORM_PLUGIN_PATH-}"
+    # A shell may create an unexported default PATH when none was supplied.
+    if /usr/bin/printenv PATH >/dev/null; then
+        save_environment PATH x "$PATH"
+    else
+        save_environment PATH '' ''
+    fi
+    export TRANSCRIBE_PORTABLE_SNAPSHOT_VERSION=1
+fi
+export TRANSCRIBE_PORTABLE_ROOT="$app_root"
 # Set only the child environment. Never depend on a Qt SDK or tools from PATH.
 export LD_LIBRARY_PATH="$app_root/usr/lib"
 export QT_PLUGIN_PATH="$app_root/usr/plugins"

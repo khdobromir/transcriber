@@ -1,5 +1,8 @@
 // Candidate-only smoke: actual QML + controller + installed CLI + real tools/model.
 #include "backend.hpp"
+#ifdef Q_OS_LINUX
+#include "portable_fonts.hpp"
+#endif
 #include "files.hpp"
 #include <QCryptographicHash>
 #include <QGuiApplication>
@@ -147,8 +150,14 @@ private slots:
     }
 };
 int main(int argc, char** argv) {
+#ifdef Q_OS_LINUX
+    initializePortableFonts();
+#endif
     QQuickStyle::setStyle("Material");
     QGuiApplication app(argc, argv);
+#ifdef Q_OS_LINUX
+    writePortableFontDiagnostics();
+#endif
     RealGuiTests tests; return QTest::qExec(&tests, argc, argv);
 }
 #include "test_gui_real.moc"

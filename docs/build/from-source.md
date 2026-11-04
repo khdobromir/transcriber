@@ -14,7 +14,8 @@
   test is registered when FFmpeg is found. Runtime ASR/model dependencies are
   separate from compilation of Transcribe itself.
 - Linux GUI builds with the official Qt SDK need OpenGL development libraries;
-  Ubuntu packages include `libgl-dev libglx-dev libopengl-dev libegl-dev`.
+  Ubuntu packages include `libgl-dev libglx-dev libopengl-dev libegl-dev` and
+  `libfontconfig-dev`. Fontconfig is a Linux GUI build dependency, not a CLI-only one.
 - Windows: Visual Studio 2022 C++ workload/Windows SDK, x64 developer environment.
   Its preset generator needs CMake 3.21+ (the CLI project still accepts 3.20
   with other supported generators). Official GUI packages require CMake 3.24+,
@@ -105,3 +106,8 @@ support an isolated installation; preserve the data override at runtime. Existin
 changed/wrong-revision engine sources are rejected instead of overwritten.
 Each binary rename is atomic, but engine/CLI/default-model replacement is not one
 transaction. Use a separate data/bin directory when testing upgrades.
+
+Linux GUI tests require DejaVu Sans (`fonts-dejavu-core` on Ubuntu/Debian).
+The isolated font fixture copies that font into its temporary bundle and sets
+`QT_QPA_FONTDIR`, matching AppRun without relying on the host Qt font database.
+For another font location, configure `-DTRANSCRIBE_TEST_FONT=/path/to/DejaVuSans.ttf`.

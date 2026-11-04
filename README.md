@@ -10,19 +10,19 @@
 yt-dlp, обработка медиа — через FFmpeg. В текущих исходниках GUI поддерживает
 русский и английский языки, автоматический выбор и переключение без перезапуска.
 Язык распознавания остаётся русским; консольный интерфейс CLI также остаётся
-русским. Бета v0.5.0-beta.1 добавляет интерфейс Material You / Material 3,
-палитру по обоям или картинке и адаптивную навигацию. Ручная приёмка Windows
-остаётся открытой; стабильная версия — v0.4.1.
+русским. Исходники v0.5.0 включают интерфейс Material You / Material 3,
+палитру по обоям или картинке и адаптивную навигацию. Windows-приёмка беты
+и исправлений прокрутки/ETA пройдена по отчёту пользователя. В v0.5.0 также
+исправлены открытие результатов из Linux AppImage и инициализация Fontconfig.
 
 **C++23 · Qt Quick / QML · CMake · Linux / Windows · CPU-only**
 
-[Скачать v0.4.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.4.1)
-· [Бета v0.5.0-beta.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.5.0-beta.1)
+[Скачать v0.5.0](https://github.com/khdobromir/transcriber/releases/tag/v0.5.0)
 · [История изменений](CHANGELOG.md) · [Документация](docs/README.md)
 · [Участие в разработке](CONTRIBUTING.md)
 
-[Описание беты](docs/releases/v0.5.0-beta.1/notes.md) и
-[область проверок](docs/releases/v0.5.0-beta.1/validation.md).
+[Описание v0.5.0](docs/releases/v0.5.0/notes.md) и
+[область проверок и свидетельства](docs/releases/v0.5.0/validation.md).
 
 ## Демонстрация
 
@@ -34,7 +34,7 @@ yt-dlp, обработка медиа — через FFmpeg. В текущих �
 
 ```sh
 transcribe --version
-# transcribe 0.5.0-beta.1 (версия текущих исходников)
+# transcribe 0.5.0 (версия текущих исходников)
 transcribe --model small "lecture.wav"
 transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 ```
@@ -46,6 +46,8 @@ transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 
 - Локальные аудио- и видеофайлы либо один URL, поддерживаемый установленным yt-dlp.
 - Частичный текст во время распознавания, прогресс и приблизительное оставшееся время.
+- Сохранение места чтения и выделения; автопрокрутка внизу и кнопка «К новому тексту».
+- Сглаженная оценка оставшегося времени с округлением и обновлением раз в пять секунд.
 - Экспорт TXT, SRT и VTT с отдельным каталогом результатов каждого запуска.
 - Отмена, сохранение частичных результатов и отдельные диагностические журналы инструментов.
 - Загрузка и импорт моделей с проверкой SHA-256; пресеты small, medium и turbo.
@@ -58,7 +60,7 @@ transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 
 [Краткая инструкция на русском](docs/user/ru/quick-start.md) · [English guide](docs/user/quick-start.md)
 
-1. Скачайте приложение из [Releases](https://github.com/khdobromir/lecture-transcriber/releases/latest) и сравните SHA-256 с digest этого файла.
+1. Скачайте приложение из [Releases](https://github.com/khdobromir/transcriber/releases/latest) и сравните SHA-256 с digest этого файла.
 2. Linux: разрешите запуск AppImage и откройте его. Windows: распакуйте **весь** ZIP и запустите `bin/transcribe-gui.exe`.
 3. Откройте **Модели / Models**, скачайте или импортируйте модель распознавания и Silero VAD.
 4. На вкладке **Расшифровка / Transcription** выберите локальный файл, каталог результатов и запустите обработку.
@@ -93,8 +95,8 @@ chmod +x Transcribe-X.Y.Z-linux-x86_64.AppImage
 Для установки CLI из исходников в Linux после установки зависимостей:
 
 ```sh
-git clone https://github.com/khdobromir/lecture-transcriber.git
-cd lecture-transcriber
+git clone https://github.com/khdobromir/transcriber.git
+cd transcriber
 bash install.sh small
 export PATH="$HOME/.local/bin:$PATH"
 transcribe --help

@@ -332,7 +332,8 @@ def main():
         QML_SOURCES_PATHS=str(PROJECT / "gui"), EXTRA_PLATFORM_PLUGINS="libqoffscreen.so;libqwayland-egl.so;libqwayland-generic.so",
         EXTRA_QT_MODULES="waylandclient", PATH=str(cache) + os.pathsep + env["PATH"])
     command = [dependencies["linuxdeploy"], "--appdir", appdir, "--executable", appdir / "usr/bin/transcribe-gui",
-        "--executable", appdir / "usr/bin/transcribe", "--desktop-file", PROJECT / "packaging/linux/transcribe-gui.desktop",
+        "--executable", appdir / "usr/bin/transcribe", "--executable", appdir / "usr/bin/transcribe-desktop-opener",
+        "--desktop-file", PROJECT / "packaging/linux/transcribe-gui.desktop",
         "--icon-file", PROJECT / "packaging/linux/transcribe-gui.png", "--plugin", "qt"]
     # Qt's platform plugins also load these integration plugins dynamically.
     # Deploy their dependencies explicitly; they aren't ELF DT_NEEDED entries

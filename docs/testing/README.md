@@ -122,7 +122,7 @@ uses a temporary directory and does not rewrite source files. `gui_controller`
 checks locale selection, persisted preferences, preflight diagnostics and model
 operations across language changes. `gui_cli_integration` switches languages
 while actual CLI workers are held at a fixture barrier, then confirms the same
-workers finish and publish TXT/SRT/VTT. `gui_qml` checks retained messages,
+workers finish and publish TXT/SRT/VTT. `gui_qml_*` checks retained messages,
 history, input text and keyboard focus. Minimum-window/palette scenarios run in
 both languages at normal, 150% and 200% scale.
 
@@ -131,3 +131,10 @@ extension, malformed fields, size limits, old events and unchanged Russian CLI
 output. Native OS dialogs and external-tool/OS diagnostic details may retain
 their original language; transcript content is never translated. These tests use
 fixtures and do not establish native desktop acceptance or ASR accuracy.
+
+`gui_transcript_view` runs the large streaming/reading/selection regression in its
+own process with a 60-second budget. Each general `gui_qml_*` scenario runs in a
+separate process with its own 30-second budget, including the complete data rows
+for palette tests. `gui_qml_registration` compares QtTest discovery against the
+CTest scenario list and fails if a test is missing or listed twice. DPI 150/200%
+variants remain separate. All original assertions remain enabled.

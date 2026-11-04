@@ -6,9 +6,11 @@ from pathlib import Path
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 from linux_package import digest, verify
 from check_ytdlp_plugins import check as check_plugins
+from portable_fonts import require_clean_diagnostics, require_font_report, check_broken_config
 
 
 def clean_environment():
@@ -16,6 +18,9 @@ def clean_environment():
     for name in ["LD_LIBRARY_PATH", "LD_PRELOAD", "QT_PLUGIN_PATH", "QML_IMPORT_PATH", "QML2_IMPORT_PATH",
                  "CMAKE_PREFIX_PATH", "QT_QPA_PLATFORM_PLUGIN_PATH", "APPDIR", "APPIMAGE", "APPIMAGE_EXTRACT_AND_RUN"]:
         env.pop(name, None)
+    for name in list(env):
+        if name.startswith("TRANSCRIBE_PORTABLE_"):
+            env.pop(name)
     return env
 
 
@@ -28,9 +33,10 @@ def main():
     parser.add_argument("--artifacts", type=Path, help="New directory for persistent smoke evidence")
     args = parser.parse_args()
     image = args.image.resolve()
-    artifacts = args.artifacts.resolve() if args.artifacts else None
-    if artifacts:
+    artifacts = args.artifacts.resolve() if args.artifacts else Path(tempfile.mkdtemp(prefix="transcribe-package-evidence-"))
+    if args.artifacts:
         artifacts.mkdir(parents=True, exist_ok=False)
+    print("Smoke evidence: " + str(artifacts), file=sys.stderr)
     with tempfile.TemporaryDirectory(prefix="transcribe-appimage-") as temporary:
         work = Path(temporary) / "Проверка 😀"; work.mkdir()
         # Actually copy the one final artifact. No build/source/installed tool paths.
@@ -41,6 +47,8 @@ def main():
         with (work / "extract.log").open("wb") as log:
             subprocess.run([str(moved), "--appimage-extract"], cwd=work, env=env, stdout=log, stderr=log, check=True, timeout=180)
         root = work / "squashfs-root"; manifest = verify(root, args.source)
+        evidence_directory = artifacts if artifacts else work / "evidence"
+        evidence_directory.mkdir(exist_ok=True)
         expected_icon = (Path(__file__).resolve().parents[1] / "packaging/linux/transcribe-gui.png").read_bytes()
         for icon in [root / "transcribe-gui.png", root / "usr/share/icons/hicolor/512x512/apps/transcribe-gui.png"]:
             if icon.read_bytes() != expected_icon:
@@ -56,28 +64,28 @@ def main():
             subprocess.run([str(root / "usr/bin/tools" / name), option], cwd=work, env=tool_env,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=120)
         plugin_evidence = check_plugins(root / "usr/bin/tools/yt-dlp", tool_env)
-        child = subprocess.Popen([str(moved), "--appimage-extract-and-run"], cwd=work, env=env,
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
-        try:
+        startup = evidence_directory / 'startup.log'
+        fonts = evidence_directory / 'portable-fonts.json'
+        startup_env = dict(env, TRANSCRIBE_PORTABLE_DIAGNOSTICS=str(fonts))
+        with startup.open('wb') as output:
+            child = subprocess.Popen([str(moved), '--appimage-extract-and-run'], cwd=work, env=startup_env,
+                                     stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
             try:
-                child.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                pass
-            else:
-                raise RuntimeError("Portable GUI exited early: " + repr(child.communicate()))
-        finally:
-            # The runtime waits for a second process: stop the whole idle GUI
-            # session before removing the extraction directory and libraries.
-            try:
-                os.killpg(child.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-            _, diagnostics = child.communicate(timeout=20)
-        for marker in [b"failed to load", b"is not installed", b"TypeError", b"ReferenceError", b"Binding loop"]:
-            if marker in diagnostics:
-                raise RuntimeError("Portable QML diagnostic: " + repr(diagnostics))
-        if artifacts:
-            (artifacts / "startup.log").write_bytes(diagnostics)
+                try:
+                    child.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
+                else:
+                    raise RuntimeError("Portable GUI exited early; full output saved in " + str(startup))
+            finally:
+                try:
+                    os.killpg(child.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+                child.wait(timeout=20)
+        require_clean_diagnostics(startup)
+        font_evidence = require_font_report(fonts)
+        check_broken_config(root, env, evidence_directory)
         if args.real_gui:
             if not args.prerequisites:
                 parser.error("--real-gui requires --prerequisites")
@@ -86,12 +94,18 @@ def main():
                 TRANSCRIBE_REAL_ARTIFACTS=str(work / "real-result"), LD_LIBRARY_PATH=str(root / "usr/lib"),
                 QT_PLUGIN_PATH=str(root / "usr/plugins"), QML_IMPORT_PATH=str(root / "usr/qml"),
                 TRANSCRIBE_CA_BUNDLE=str(root / "usr/share/transcribe/ca-certificates.crt"))
-            result = subprocess.run([str(args.real_gui.resolve()), "-o", str(work / "real-gui.log") + ",txt"],
-                                    cwd=work, env=real_env, check=False, timeout=360)
-            if artifacts and (work / "real-gui.log").is_file():
-                shutil.copy2(work / "real-gui.log", artifacts / "real-gui.log")
+            real_env.update(TRANSCRIBE_PORTABLE_ROOT=str(root),
+                            TRANSCRIBE_PORTABLE_DIAGNOSTICS=str(evidence_directory / 'real-gui-fonts.json'))
+            try:
+                result = subprocess.run([str(args.real_gui.resolve()), "-o", str(work / "real-gui.log") + ",txt"],
+                                        cwd=work, env=real_env, check=False, timeout=360)
+            finally:
+                if (work / "real-gui.log").is_file():
+                    shutil.copy2(work / "real-gui.log", artifacts / "real-gui.log")
             if result.returncode:
                 raise RuntimeError("Real GUI smoke failed:\n" + (work / "real-gui.log").read_text())
+            require_clean_diagnostics(work / 'real-gui.log')
+            require_font_report(evidence_directory / 'real-gui-fonts.json')
             evidence = json.loads((work / "real-result/validation.json").read_text())
             if not evidence["completed"] or not evidence["live_preview"]:
                 raise RuntimeError("Real portable GUI smoke did not confirm completion/preview")
@@ -101,7 +115,8 @@ def main():
         summary = {"source": manifest["source"], "image_sha256": digest(image), "version": version,
             "qt": manifest["qt"], "different_unicode_cwd": True, "no_fuse_startup": True,
             "gui_startup": True, "all_bundled_tools": True, "application_icon": True,
-            "downloader_plugin_isolation": plugin_evidence, "real_gui": bool(args.real_gui)}
+            "downloader_plugin_isolation": plugin_evidence, "real_gui": bool(args.real_gui),
+            "portable_fonts": font_evidence, "damaged_font_config_rejected": True}
         if artifacts:
             (artifacts / "package-smoke.json").write_text(json.dumps(summary, indent=2) + "\n")
         print(json.dumps(summary))

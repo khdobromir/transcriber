@@ -6,6 +6,8 @@
 #include "models.hpp"
 #include "protocol.hpp"
 #include "states.hpp"
+#include "eta.hpp"
+#include "desktop.hpp"
 #include <QFutureWatcher>
 #include <QProcess>
 #include <QSettings>
@@ -26,6 +28,8 @@ class Backend : public QObject {
     Q_PROPERTY(QString taskResultDirectory READ taskResultDirectory NOTIFY changed)
     Q_PROPERTY(QString warning READ warning NOTIFY changed)
     Q_PROPERTY(QString previewError READ previewError NOTIFY changed)
+    Q_PROPERTY(QString resultOpenError READ resultOpenError NOTIFY changed)
+    Q_PROPERTY(QString taskOpenError READ taskOpenError NOTIFY changed)
     Q_PROPERTY(QString historyError READ historyError NOTIFY changed)
     Q_PROPERTY(bool canRetry READ canRetry NOTIFY changed)
     Q_PROPERTY(bool canCancel READ canCancel NOTIFY changed)
@@ -50,6 +54,7 @@ public:
     struct Paths {
         QString binary, settingsFile, dataRoot;
         QVector<ModelManager::Record> modelRecords = {};
+        QString desktopHelper = {}, desktopLauncher = "/usr/bin/xdg-open";
     };
     using Cancel = std::shared_ptr<std::atomic<bool>>;
     struct Readers {
@@ -76,6 +81,8 @@ public:
     QString taskResultDirectory() const { return result_; }
     QString warning() const { return warning_; }
     QString previewError() const { return previewError_; }
+    QString resultOpenError() const { return resultOpenError_; }
+    QString taskOpenError() const { return taskOpenError_; }
     QString historyError() const { return historyError_; }
     bool canRetry() const { return !active() && !lastInput_.isEmpty() && (state_ == TaskState::failed || state_ == TaskState::interrupted); }
     bool canCancel() const { return busy() && state_ != TaskState::cancel_requested && !terminal_; }
@@ -87,7 +94,7 @@ public:
     void initializeLanguage();
     QString transcript() const { return transcript_; }
     double progress() const { return progress_; }
-    QString eta() const { return eta_; }
+    QString eta() const { return etaPresentation_.text(); }
     QString outputDirectory() const { return output_; }
     QString modelSelection() const { return modelSelection_; }
     QString appHome() const { return dataRoot_; }
@@ -112,12 +119,17 @@ public:
 signals:
     void changed();
     void transcriptChanged();
+    void transcriptReset();
     void draftChanged();
 
 private:
     QString modelSelection_ = "medium";
     QString binary_, dataRoot_, output_, result_, selected_, selectedStatus_ = "unknown", transcript_, lastInput_;
-    UiText stage_, error_, warning_, eta_, previewError_, historyError_;
+    UiText stage_, error_, warning_, previewError_, historyError_;
+    UiText resultOpenError_, taskOpenError_;
+    std::unique_ptr<DesktopOpener> desktop_;
+    quint64 resultOpenRequest_ = 0, taskOpenRequest_ = 0;
+    EtaPresentation etaPresentation_;
     bool transcriptTail_ = false;
     QVariantMap lastValues_;
     TaskState state_ = TaskState::idle;
@@ -131,7 +143,7 @@ private:
     QString terminalStatus_;
     int terminalCode_ = -1;
     QProcess process_;
-    QTimer previewTimer_, cancelTimer_;
+    QTimer previewTimer_, cancelTimer_, etaTimer_;
     QSettings settings_;
     std::unique_ptr<LanguageController> language_;
     std::unique_ptr<ThemeController> theme_;
@@ -155,4 +167,6 @@ private:
     void settled();
     void transition(TaskState state);
     void selectResult(const QString& directory, const QString& status);
+    void resetEta();
+    void openResultFile(bool task, const QString& extension);
 };

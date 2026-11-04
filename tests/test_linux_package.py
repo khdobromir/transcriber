@@ -12,6 +12,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from linux_package import verify
+from portable_fonts import require_clean_diagnostics, require_font_report, check_broken_config
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 spec = importlib.util.spec_from_file_location("linux_builder", Path(__file__).resolve().parents[1] / "scripts/package-linux.py")
@@ -20,6 +21,83 @@ spec.loader.exec_module(builder)
 
 
 class LinuxPackageTests(unittest.TestCase):
+    def test_font_smoke_rejects_diagnostics_and_preserves_full_output(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            log = Path(temporary) / 'startup.log'
+            for marker in ['Fontconfig warning:', 'Fontconfig error:', 'TypeError']:
+                text = 'before\n' + marker + ' diagnostic\nafter\n'
+                log.write_text(text)
+                with self.assertRaises(RuntimeError):
+                    require_clean_diagnostics(log)
+                self.assertEqual(log.read_text(), text)
+            log.write_text('ordinary output\n')
+            require_clean_diagnostics(log)
+
+    def test_font_smoke_requires_actual_portable_initialization(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            report = Path(temporary) / 'fonts.json'
+            valid = dict(portable_fontconfig=True, bundled_fontconfig=True, fontconfig_manifest_match=True,
+                         cyrillic=True, bundle_root='/bundle', fontconfig_library='/bundle/usr/lib/libfontconfig.so.1',
+                         fontconfig_sha256='a' * 64, fontconfig_version=21500, config='/bundle/usr/share/transcribe/fonts.conf')
+            report.write_text(json.dumps(valid))
+            require_font_report(report)
+            for key in ['portable_fontconfig', 'bundled_fontconfig', 'fontconfig_manifest_match', 'cyrillic']:
+                report.write_text(json.dumps(dict(valid, **{key: False})))
+                with self.assertRaises(RuntimeError):
+                    require_font_report(report)
+
+    def test_damaged_config_smoke_restores_payload_and_saves_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config = root / 'usr/share/transcribe/fonts.conf'
+            config.parent.mkdir(parents=True)
+            config.write_bytes(b'original config')
+            app = root / 'AppRun'
+            app.write_text('#!/bin/sh\nprintf "Portable Fontconfig initialization failed\\n" >&2\nexit 1\n')
+            app.chmod(0o755)
+            check_broken_config(root, os.environ, root)
+            self.assertEqual(config.read_bytes(), b'original config')
+            self.assertIn('Portable Fontconfig initialization failed', (root / 'damaged-fontconfig.log').read_text())
+            app.write_text('#!/bin/sh\nexit 0\n')
+            with self.assertRaises(RuntimeError):
+                check_broken_config(root, os.environ, root)
+            self.assertEqual(config.read_bytes(), b'original config')
+    def test_apprun_preserves_incoming_environment_and_reentry(self):
+        names = ['LD_LIBRARY_PATH', 'QT_PLUGIN_PATH', 'QML_IMPORT_PATH', 'QML2_IMPORT_PATH',
+                 'FONTCONFIG_FILE', 'QT_QPA_FONTDIR', 'TRANSCRIBE_CA_BUNDLE', 'QT_QPA_PLATFORMTHEME',
+                 'QT_QUICK_BACKEND', 'QT_QPA_PLATFORM_PLUGIN_PATH', 'PATH']
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'Приложение 😀'
+            tools = root / 'usr/bin/tools'
+            tools.mkdir(parents=True)
+            (tools / '.transcribe-bundle').write_text('1\n')
+            shutil.copy2(builder.PROJECT / 'packaging/linux/AppRun', root / 'AppRun')
+            script = ('#!' + sys.executable + '\nimport json,os,sys\n'
+                      'if os.environ.pop("TEST_REENTER", "") == "1":\n'
+                      ' os.execv("/bin/sh", ["/bin/sh", os.environ["TRANSCRIBE_PORTABLE_ROOT"] + "/AppRun"])\n'
+                      'print(json.dumps(dict(os.environ)))\n')
+            for name in ['transcribe-gui', 'transcribe']:
+                binary = root / 'usr/bin' / name
+                binary.write_text(script)
+                binary.chmod(0o755)
+            for value in [None, '', 'Путь с пробелами 😀 $(literal) `literal`\nnext']:
+                env = {k: v for k, v in os.environ.items() if k not in names and not k.startswith('TRANSCRIBE_PORTABLE_')}
+                if value is not None:
+                    env.update({name: value for name in names})
+                for args, reenter in [([], False), (['--transcribe-cli'], False), ([], True)]:
+                    with self.subTest(value=value, args=args, reenter=reenter):
+                        incoming = dict(env)
+                        if reenter:
+                            incoming['TEST_REENTER'] = '1'
+                        output = json.loads(subprocess.check_output(['/bin/sh', str(root / 'AppRun'), *args], env=incoming))
+                        self.assertEqual(output['TRANSCRIBE_PORTABLE_SNAPSHOT_VERSION'], '1')
+                        self.assertEqual(output['TRANSCRIBE_PORTABLE_ROOT'], str(root))
+                        for name in names:
+                            prefix = 'TRANSCRIBE_PORTABLE_ENV_' + name
+                            self.assertEqual(output[prefix + '_SET'], '' if value is None else 'x')
+                            self.assertEqual(output[prefix + '_VALUE'], value or '')
+                        self.assertEqual(output['LD_LIBRARY_PATH'], str(root / 'usr/lib'))
+                        self.assertNotIn('QT_QPA_PLATFORM_PLUGIN_PATH', output)
     def test_gateway_download_retries_are_bounded_and_keep_strict_hashes(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
