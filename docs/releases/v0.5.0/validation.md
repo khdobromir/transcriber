@@ -1,4 +1,4 @@
-# v0.5.0 local preparation and verification
+# v0.5.0 verification scope and preparation history
 
 Status: stable publication and local upgrade authorized by the owner on 2026-11-04.
 The release asset `release-validation.json` records actual final master CI,
