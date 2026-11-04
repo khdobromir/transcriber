@@ -108,7 +108,7 @@ private slots:
         }
         auto invalid = QProcessEnvironment::systemEnvironment();
         invalid.remove("TRANSCRIBE_PORTABLE_ENV_PATH_SET");
-        QVERIFY_EXCEPTION_THROWN(portable::desktopEnvironment(invalid), std::runtime_error);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, portable::desktopEnvironment(invalid));
     }
     void exitsAndFailures_data() {
         QTest::addColumn<QString>("name");
