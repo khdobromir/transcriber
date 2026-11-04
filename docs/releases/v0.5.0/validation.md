@@ -211,3 +211,11 @@ including all data rows. Discovery/registration comparison rejects missing or
 duplicate scenarios. Native Windows platform/theme, runtime deployment, catalogs,
 DPI variants and every original assertion remain enabled; verbose per-scenario
 logs identify the exact failing check if a scenario itself stalls.
+
+The first automatic master portable run rejected PCRE2 10.42-4ubuntu2.1 from the
+pinned base because its exact source had left the current Ubuntu indexes. The
+builder now upgrades all preinstalled packages from the same authenticated APT
+indexes before installing build dependencies. An isolated copy of that exact base
+reproduced the unavailable old source, completed the upgrade to 10.42-4ubuntu2.2,
+and passed exact-version source selection afterward. No nearest-version fallback,
+source checksum relaxation or manual final-master workflow repeat was used.
