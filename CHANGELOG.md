@@ -1,8 +1,9 @@
 # Изменения
 
-## v0.5.0 — local preparation, 2026-11-01
+## v0.5.0 — 2026-11-04
 
-Prepared for owner review; publication and tag creation are not authorized yet.
+Stable publication and local upgrade authorized. Exact final-SHA checks and package
+identities are recorded in the release asset `release-validation.json`.
 See [release notes](docs/releases/v0.5.0/notes.md) and
 [verification status](docs/releases/v0.5.0/validation.md).
 
@@ -13,8 +14,14 @@ See [release notes](docs/releases/v0.5.0/notes.md) and
 - Recalculate ETA at five-second intervals, smooth the predicted finish time and
   display rounded minutes or five-second steps. Mark stalled estimates as refining.
 - Record the user's successful Windows 11 24H2 beta and focused UI acceptance.
-- Preserve CLI/protocol/result compatibility. Record the existing Linux AppImage
-  external-launch environment issue as an unresolved packaging limitation.
+- Restore the host environment when opening results from Linux AppImage; monitor
+  desktop handlers asynchronously and reap monitors without closing opened applications.
+- Initialize bundled Fontconfig before GUI startup with a private configuration;
+  reject broken configurations and verify Cyrillic fonts in clean Ubuntu/Debian.
+- Refresh pinned Linux builder runtimes while retaining exact source provenance.
+- Preserve CLI/protocol/result compatibility and external user data.
+- Run installed Linux/Windows real ASR and portable clean-environment checks
+  automatically on pushes to master, alongside the standalone real Whisper smoke.
 
 ## v0.5.0-beta.1 — 2026-10-17
 
@@ -57,7 +64,7 @@ See [release notes](docs/releases/v0.4.1/notes.md) and
 
 ## 0.4.0 — 2026-10-11
 
-Published as [v0.4.0](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.4.0),
+Published as [v0.4.0](https://github.com/khdobromir/transcriber/releases/tag/v0.4.0),
 including Linux AppImage, Windows ZIP, checksums and retained build inputs.
 Source: `926366a1c4f7ec2d1cc188f8448591809cc3282c`.
 See the [final validation summary](docs/releases/v0.4.0/validation.md).

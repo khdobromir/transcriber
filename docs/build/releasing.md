@@ -34,8 +34,10 @@ the suffix, rebuilding final packages and completing the recorded open acceptanc
 
 ## Automated package evidence
 
-For automated evidence, dispatch **CI** and **Linux portable GUI** on the exact candidate source with
-`real_smoke=true`, plus **Real Whisper smoke**. Inspect the jobs and
+Pushes to `master` automatically run **CI** and **Linux portable GUI** with real
+smoke enabled, plus **Real Whisper smoke**. Use these exact-source automatic runs
+for a merged release; do not manually redispatch them. For other candidate refs,
+manual dispatch with `real_smoke=true` remains available. Inspect the jobs and
 actual real steps; a skipped step does not establish a pass. The CI matrix is
 [defined here](../../.github/workflows/ci.yml); do not freeze a job-count claim
 that can drift. Record source SHA and concrete run links.
@@ -152,7 +154,7 @@ Query GitHub's release JSON after upload and require every asset's `digest`
 (`sha256:<hex>`) and size to match the freshly recomputed local inventory:
 
 ```sh
-gh api "repos/khdobromir/lecture-transcriber/releases/tags/v$version" > "$delivery/github-release.json"
+gh api "repos/khdobromir/transcriber/releases/tags/v$version" > "$delivery/github-release.json"
 python3 scripts/release_assets.py verify-github "$delivery/assets" --version "$version" --github-json "$delivery/github-release.json"
 ```
 

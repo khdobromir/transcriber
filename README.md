@@ -12,18 +12,17 @@ yt-dlp, обработка медиа — через FFmpeg. В текущих �
 Язык распознавания остаётся русским; консольный интерфейс CLI также остаётся
 русским. Исходники v0.5.0 включают интерфейс Material You / Material 3,
 палитру по обоям или картинке и адаптивную навигацию. Windows-приёмка беты
-и исправлений прокрутки/ETA пройдена по отчёту пользователя. Выпуск v0.5.0
-подготовлен локально для проверки владельцем; опубликованная стабильная версия — v0.4.1.
+и исправлений прокрутки/ETA пройдена по отчёту пользователя. В v0.5.0 также
+исправлены открытие результатов из Linux AppImage и инициализация Fontconfig.
 
 **C++23 · Qt Quick / QML · CMake · Linux / Windows · CPU-only**
 
-[Скачать v0.4.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.4.1)
-· [Бета v0.5.0-beta.1](https://github.com/khdobromir/lecture-transcriber/releases/tag/v0.5.0-beta.1)
+[Скачать v0.5.0](https://github.com/khdobromir/transcriber/releases/tag/v0.5.0)
 · [История изменений](CHANGELOG.md) · [Документация](docs/README.md)
 · [Участие в разработке](CONTRIBUTING.md)
 
 [Описание v0.5.0](docs/releases/v0.5.0/notes.md) и
-[состояние подготовки и проверок](docs/releases/v0.5.0/validation.md).
+[область проверок и свидетельства](docs/releases/v0.5.0/validation.md).
 
 ## Демонстрация
 
@@ -61,7 +60,7 @@ transcribe --chunks 10 --jobs 2 --threads 3 --out "results" "lecture.mp4"
 
 [Краткая инструкция на русском](docs/user/ru/quick-start.md) · [English guide](docs/user/quick-start.md)
 
-1. Скачайте приложение из [Releases](https://github.com/khdobromir/lecture-transcriber/releases/latest) и сравните SHA-256 с digest этого файла.
+1. Скачайте приложение из [Releases](https://github.com/khdobromir/transcriber/releases/latest) и сравните SHA-256 с digest этого файла.
 2. Linux: разрешите запуск AppImage и откройте его. Windows: распакуйте **весь** ZIP и запустите `bin/transcribe-gui.exe`.
 3. Откройте **Модели / Models**, скачайте или импортируйте модель распознавания и Silero VAD.
 4. На вкладке **Расшифровка / Transcription** выберите локальный файл, каталог результатов и запустите обработку.
@@ -96,8 +95,8 @@ chmod +x Transcribe-X.Y.Z-linux-x86_64.AppImage
 Для установки CLI из исходников в Linux после установки зависимостей:
 
 ```sh
-git clone https://github.com/khdobromir/lecture-transcriber.git
-cd lecture-transcriber
+git clone https://github.com/khdobromir/transcriber.git
+cd transcriber
 bash install.sh small
 export PATH="$HOME/.local/bin:$PATH"
 transcribe --help

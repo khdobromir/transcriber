@@ -1,9 +1,13 @@
 # v0.5.0 local preparation and verification
 
-Status: prepared locally for owner review, not published. The owner authorized
-local commits and release preparation on 2026-11-01 and explicitly prohibited
-pushes, tag creation and GitHub Release creation until review. No remote CI or
-publication action is part of this preparation.
+Status: stable publication and local upgrade authorized by the owner on 2026-11-04.
+The release asset `release-validation.json` records actual final master CI,
+package delivery and publication results. The earlier local review restriction
+has been superseded by this authorization. The canonical
+repository is [khdobromir/transcriber](https://github.com/khdobromir/transcriber).
+Final measured identities and CI run links will be retained beside the immutable
+12-asset release in `release-validation.json`; earlier candidate evidence below
+is historical and does not validate final-SHA binaries.
 
 ## Source and changes
 
@@ -160,13 +164,17 @@ full run logs, font diagnostics, public speech/model inputs and native screensho
 The earlier v0.5.0-local-review directory still describes its older source and
 native build; those old bytes were not renamed as the new portable candidate.
 Required evidence is copied out of .cache/linux-package-container/run-* before
-temporary build environments are removed. Existing user .vscode and the untracked
-review bundle are preserved. Windows acceptance above remains the user's report;
+temporary build environments are removed. The user .vscode directory is preserved and now ignored. The task review bundle
+was removed as authorized on 2026-11-04. Windows acceptance above remains the user's report;
 no Windows package hash or source SHA is invented for these Linux checks.
 
-After owner review, use the existing release procedure to obtain final-SHA CI,
+Under the 2026-11-04 authorization, use the release procedure to obtain final-SHA CI,
 build the final Windows ZIP/Linux AppImage and matching source/build-input/notice
 materials, and record actual hashes and skipped checks. Do not reuse or rename
 beta binaries as stable. The canonical 12-asset contract remains defined by
 `scripts/release_assets.py`; the locally prepared source archive alone does not
-satisfy it. Create an annotated `v0.5.0` tag and publish only after authorization.
+satisfy it. Create an annotated `v0.5.0` tag on verified master and publish as stable latest.
+Pushes to master now enable real smoke in CI (installed Linux and Windows ZIP),
+Linux portable (including offline Ubuntu/Debian) and Real Whisper smoke. Manual
+dispatch remains available and the weekly Real Whisper schedule is unchanged.
+Do not manually redispatch the automatic final-master runs.
