@@ -2,54 +2,79 @@
 
 [Documentation](../README.md) · [Русский](ru/quick-start.md) · [User guide](guide.md)
 
-Transcribe recognizes Russian speech locally on CPU. Current source supports
-English and Russian GUI languages; published v0.4.1 packages have the earlier
-Russian-only interface. Both sets of labels are shown below.
+Transcribe v0.5.0 recognizes Russian speech locally on CPU. The GUI supports
+Russian and English; CLI console output remains Russian.
 
-In current-source builds, use the language selector at the top of the window:
-**Автоматически / Automatic**, **Русский**, or **English**. Automatic uses Russian
-on Russian systems and English otherwise. Your choice is saved and takes effect
-immediately, including during transcription or model operations. It does not
-change the recognition language or the CLI. Native operating-system dialogs
-may keep their system language.
+## Download
 
-1. Download the application from [GitHub Releases](https://github.com/khdobromir/lecture-transcriber/releases/latest).
-   Linux packages target x86_64/glibc 2.39+; Windows packages target Windows 11 x64.
-   Models are separate downloads. Build-input/source archives are for developers.
-2. Compare the application's SHA-256 with the digest displayed for that asset
-   on the GitHub Release page (expand its details). Starting with 0.4.1, separate
-   `.sha256`/`SHA256SUMS` files are no longer published. Existing v0.4.0 assets
-   are unchanged. Replace `X.Y.Z` below with your downloaded version. Linux:
-   `sha256sum Transcribe-X.Y.Z-linux-x86_64.AppImage`. Windows PowerShell:
-   `Get-FileHash -Algorithm SHA256 -LiteralPath '.\Transcribe-X.Y.Z-windows-x64.zip'`.
-3. Linux: make the AppImage executable and run it. If FUSE is unavailable, use
-   the same file with `--appimage-extract-and-run` (needs temporary disk space):
+Get the package for your OS from [v0.5.0](https://github.com/khdobromir/transcriber/releases/tag/v0.5.0):
 
-   ```sh
-   chmod +x Transcribe-X.Y.Z-linux-x86_64.AppImage
-   ./Transcribe-X.Y.Z-linux-x86_64.AppImage
-   # Alternative without FUSE:
-   ./Transcribe-X.Y.Z-linux-x86_64.AppImage --appimage-extract-and-run
-   ```
+- [Linux AppImage](https://github.com/khdobromir/transcriber/releases/download/v0.5.0/Transcribe-0.5.0-linux-x86_64.AppImage):
+  x86_64, glibc 2.39+.
+- [Windows ZIP](https://github.com/khdobromir/transcriber/releases/download/v0.5.0/Transcribe-0.5.0-windows-x64.zip):
+  Windows 11 x64.
 
-   Windows: extract the **entire** ZIP, preserve its directories and run
-   `bin\transcribe-gui.exe`. No Qt SDK, Python, compiler or media-tool installation
-   is required for either binary package.
-4. On **Transcription / Расшифровка**, choose `small` for an initial test. Open **Models / Модели** and
-   select **Скачать small и VAD**. Wait for successful verification. For an
-   offline first run, import the exact model file and VAD from the
-   [model manifest](../../scripts/models.tsv) using **Импорт small…** and
-   **Import VAD… / Импорт VAD…** instead. Choose the matching preset before importing.
-5. Return to **Transcription / Расшифровка**, choose a local speech recording and an output
-   directory, then select **Start transcription / Начать расшифровку**. One chunk and automatic CPU
-   settings are sufficient for the first test. Medium is the default preset
-   on a fresh GUI and may take longer.
-6. Wait for confirmed completion, then open **Directory / Каталог** or **Full TXT / Полный TXT**.
+Models are separate downloads. Source and build-input archives are for developers.
+Neither binary package needs a separate Qt SDK, Python, compiler or media-tool installation.
+
+## Verify and launch
+
+Compare SHA-256 with the digest displayed for the **same asset** on the
+GitHub Release page (expand its details). No separate checksum files are published.
+
+Linux:
+
+```sh
+sha256sum Transcribe-0.5.0-linux-x86_64.AppImage
+chmod +x Transcribe-0.5.0-linux-x86_64.AppImage
+./Transcribe-0.5.0-linux-x86_64.AppImage
+```
+
+If FUSE is unavailable, run the same file with the extraction option;
+temporary disk space is required:
+
+```sh
+./Transcribe-0.5.0-linux-x86_64.AppImage --appimage-extract-and-run
+```
+
+Windows PowerShell:
+
+```powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath '.\Transcribe-0.5.0-windows-x64.zip'
+```
+
+After verification, extract the **entire ZIP**, preserve its directories and run
+`bin\transcribe-gui.exe`. Keep its bundled tools together.
+
+## Prepare models and transcribe
+
+1. On **Transcription / Расшифровка**, select `small` for an initial test.
+   A fresh GUI defaults to `medium`, which may take longer.
+2. Open **Models / Модели** and choose **Download small and VAD / Скачать small и VAD**.
+   Wait for successful verification. For an offline first run, obtain the exact
+   recognition and VAD files listed in the [model manifest](../../scripts/models.tsv)
+   beforehand, then use **Import small… / Импорт small…** and **Import VAD… / Импорт VAD…**.
+   Match the selected preset before importing.
+3. Return to **Transcription / Расшифровка**, select your local speech recording
+   and an output directory. Keep one chunk and automatic CPU settings, then
+   choose **Start transcription / Начать расшифровку**.
+4. Wait for **Completed / Готово**, then open **Directory / Каталог** or **Full TXT / Полный TXT**.
    Each run has `transcripts/transcript.txt`, `.srt`, `.vtt`, `logs/`, `source.txt`
-   and `result.json`. Preview/100% alone does not confirm saved exports.
+   and `result.json`. Preview text and 100% progress alone do not confirm saved exports.
 
-After model preparation, local-file recognition needs no network. URL download
-and model download do. Use **Cancel / Отменить** to stop a task and retain published
-partial text. See [troubleshooting](../troubleshooting.md) for missing models,
-download failures or incomplete packages. CLI installation/builds have a separate
-[source guide](../build/from-source.md) and [CLI reference](cli.md).
+The language selector under **Settings / Настройки** offers
+**Automatic / Автоматически**, **Русский** and **English**. Automatic chooses
+Russian on Russian systems and English otherwise. Selection is saved and switching
+takes effect immediately, preserving current work. Recognition and CLI language
+remain Russian; native OS dialogs may keep their system language.
+
+After model preparation, local-file recognition needs no network. URL and model
+downloads do. **Cancel / Отменить** preserves published partial text; retry starts
+recognition again. See [troubleshooting](../troubleshooting.md) for missing models,
+download failures or incomplete packages.
+
+CLI use is separate: the Windows ZIP contains `bin\transcribe.exe`; the Linux
+AppImage does not install a command in PATH. See the
+[CLI quick start](../../README.en.md#cli-quick-start),
+[source installer prerequisites](../build/from-source.md#linux-cli-source-installer)
+and [CLI reference](cli.md).

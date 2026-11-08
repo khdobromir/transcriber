@@ -1,7 +1,7 @@
 # Documentation
 
 Start with the [English project README](../README.en.md) ([Русский](../README.md)) for downloads and a short product
-tour. The guides below separate current instructions from dated evidence.
+tour. User guides describe stable v0.5.0; dated release evidence remains historical.
 
 | Area | Entry points |
 |---|---|
@@ -11,10 +11,10 @@ tour. The guides below separate current instructions from dated evidence.
 | Developer Guide | [Getting started and source map](developer/getting-started.md), [contributing](../CONTRIBUTING.md) |
 | Build and packaging | [Source builds/presets](build/from-source.md), [Linux portable package](build/linux-portable.md), [Windows ZIP](build/windows.md), [release procedure](build/releasing.md), [dependency source materials](build/dependency-source-materials.md) |
 | Testing | [Test layers and commands](testing/README.md), [integration coverage](testing/integration-coverage.md), [candidate validation](testing/candidate-validation.md), [manual acceptance](testing/manual.md) |
-| v0.5.0 local preparation | [Notes](releases/v0.5.0/notes.md), [verification status](releases/v0.5.0/validation.md), [Material You design](gui/material-you.md) |
-| Beta v0.5.0-beta.1 | [Notes](releases/v0.5.0-beta.1/notes.md), [historical verification scope](releases/v0.5.0-beta.1/validation.md) |
-| Stable v0.4.1 | [Notes](releases/v0.4.1/notes.md), [verification record](releases/v0.4.1/validation.md) |
-| Published v0.4.0 | [Notes](releases/v0.4.0/notes.md), [validation](releases/v0.4.0/validation.md), [binary source coverage](releases/v0.4.0/binary-source-coverage.md) |
+| Stable v0.5.0 | [Download](https://github.com/khdobromir/transcriber/releases/tag/v0.5.0), [notes](releases/v0.5.0/notes.md), [verification history](releases/v0.5.0/validation.md), [final release evidence](https://github.com/khdobromir/transcriber/releases/download/v0.5.0/release-validation.json), [Material You design](gui/material-you.md) |
+| Historical v0.5.0-beta.1 | [Notes](releases/v0.5.0-beta.1/notes.md), [verification scope](releases/v0.5.0-beta.1/validation.md) |
+| Historical v0.4.1 | [Notes](releases/v0.4.1/notes.md), [verification record](releases/v0.4.1/validation.md) |
+| Historical v0.4.0 | [Notes](releases/v0.4.0/notes.md), [validation](releases/v0.4.0/validation.md), [binary source coverage](releases/v0.4.0/binary-source-coverage.md) |
 | Modernization | [Approved roadmap](development-roadmap.md), [implementation evidence](development-report.md) |
 | Benchmarks | [Methodology and historical limitations](benchmarks/README.md) |
 | History | [Archive](archive/README.md) |
@@ -23,3 +23,9 @@ English is the primary language of current technical documentation. Historical
 reports remain in their original language. Old flat `docs/*.md` addresses remain
 as forwarding pages through at least the next release; update new links to the
 canonical locations above.
+
+## Repository maintenance
+
+When updating the GitHub About website, use the
+[canonical Quick Start](https://github.com/khdobromir/transcriber/blob/master/docs/user/quick-start.md).
+The existing website points to the former repository name and an old development branch.

@@ -1,0 +1,39 @@
+{
+  "application_version": "0.5.0",
+  "source_commit": "b8ebf6e1655b8550358f1a54fc70589b02f67899",
+  "appimage_sha256": "387c35a18f7f413be5b2e85e75031b375ab58bae804173a4cdea038343f4e3c0",
+  "fixture": {
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/44/Ru-Russian_language_%28intro%29.ogg",
+    "source_sha256": "42c8024dfa45d275ffb47820decafd8d84540f642da0c30a11c6fc2113c5477e",
+    "source_page": "https://commons.wikimedia.org/w/index.php?title=File:Ru-Russian_language_(intro).ogg&oldid=1157054605",
+    "license": "CC BY 3.0",
+    "license_url": "https://creativecommons.org/licenses/by/3.0/",
+    "attribution": "Andrew Krizhanovsky and Nataly Lugovaya (voices); Andrei Rybak (noise reduction); Russian Wikipedia article authors (text)",
+    "clip_start_seconds": 30,
+    "clip_duration_seconds": 30,
+    "transformations": "30–60 second excerpt, mono PCM s16le at 16000 Hz; metadata removed",
+    "reference_wav_sha256": "3a2de982221381bf7d51e228bb8d47da90cce7e6b1d4e841c2f24f433223869f"
+  },
+  "recognition": {
+    "model": "small-q5_1",
+    "language": "ru",
+    "threads": 2,
+    "chunks": 1,
+    "jobs": 1,
+    "vad": false,
+    "model_sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"
+  },
+  "exports_sha256": {
+    "transcript.txt": "104143bd96e94b6b7392158ee85cc84d8d6c0ae858916a8967e3c409511f3acd",
+    "transcript.srt": "3b11fb3fb3889a71ef28f27b299db21aff34df0f3444c813bc786a9d9aad41bc",
+    "transcript.vtt": "3927ee953ae7f8524bea607188b9773180713bf6c47cc2111eedcf180cec18dd"
+  },
+  "exports": "Unmodified exports from the final v0.5.0 release verification; not a reference transcript or accuracy benchmark.",
+  "screenshot": {
+    "file": "../transcription.png",
+    "sha256": "3b662c8c5142399efdb529e4679eb88730b934bcccc23ef1794872bc1d925be0",
+    "capture": "Actual installed v0.5.0 AppImage, result opened from history with private settings and neutral copied metadata; no recognition performed during capture.",
+    "gui_language": "ru",
+    "model_preset": "small"
+  }
+}
