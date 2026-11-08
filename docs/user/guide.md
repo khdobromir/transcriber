@@ -2,16 +2,19 @@
 
 [Quick Start](quick-start.md) · [CLI](cli.md) · [Русский](ru/guide.md)
 
+For package downloads, SHA-256 verification and launch instructions, see
+the [v0.5.0 quick start](quick-start.md#verify-and-launch).
+
 ## Inputs and models
 
 Supply one local audio/video file or one plain HTTP(S) URL. Conversion uses
 FFmpeg; URLs use yt-dlp and depend on the site's current extractor/access rules.
 Only use material you are authorized to process. Live streams are rejected.
-Current-source GUI builds support **Автоматически / Automatic**, **Русский**
-and **English** in the top language selector. Automatic chooses Russian for a
+The v0.5.0 GUI supports **Автоматически / Automatic**, **Русский**
+and **English** under **Settings / Настройки**. Automatic chooses Russian for a
 Russian system and English otherwise; explicit selection is saved. Switching is
 immediate and preserves the current task, inputs, downloads and results. Native
-OS dialogs may use the system language. Published v0.4.1 has a Russian-only GUI.
+OS dialogs may use the system language.
 
 The recognition language is Russian. `--prompt`/the terms field supplies
 context to the model; it does not guarantee correct terminology.
@@ -96,8 +99,8 @@ authentication options are mutually exclusive. Cookies and prompts are not
 saved in GUI settings; retry retains task parameters in memory. Tool logs and
 source metadata can still contain private URLs or paths: redact before sharing.
 
-Downloader calls ignore ambient config/cache directories and disable playlists.
-Version 0.4.1 also disables plugin directories; published v0.4.0 is unchanged.
+Downloader calls ignore ambient config/cache directories and disable playlists
+and plugin directories.
 Custom extractor plugins are unsupported. Source installation needs
 a yt-dlp supporting `--no-plugin-dirs` (bundled version: 2026.08.19). An extractor
 failure is not proof of an ASR failure. See [troubleshooting](../troubleshooting.md).
