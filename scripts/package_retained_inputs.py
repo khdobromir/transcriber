@@ -99,7 +99,11 @@ def restore(platform, cache, records):
                 stream.close()
                 if digest(partial) != record["sha256"]:
                     raise ValueError("Downloaded retained archive checksum mismatch")
-                os.link(partial, archive)
+                try:
+                    os.link(partial, archive)
+                except FileExistsError:
+                    if archive.is_symlink() or digest(archive) != record["sha256"]:
+                        raise ValueError("Concurrent retained archive changed")
             finally:
                 partial.unlink(missing_ok=True)
     count = restore_archive(archive, cache, records, record["sha256"])
