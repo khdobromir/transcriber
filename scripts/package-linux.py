@@ -1,7 +1,6 @@
 """Build a relocatable AppImage without modifying the user's installation."""
 import argparse
 import errno
-import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -14,7 +13,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
-from package_source import validate_identity
+from package_source import digest, validate_identity
 from package_inputs import archive_inputs, source_records
 from package_notices import collect_qt_notices
 from package_linux_notices import collect_system_notices, collect_data_notices, write_provenance
@@ -30,14 +29,6 @@ from package_sdk_settings import retain_settings
 from package_retained_inputs import restore
 
 PROJECT = Path(__file__).resolve().parents[1]
-
-
-def digest(path):
-    checksum = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            checksum.update(block)
-    return checksum.hexdigest()
 
 
 def publish_file(source, target, expected):

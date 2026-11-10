@@ -4,7 +4,6 @@ Upstream autobuild/continuous releases expire. This archive is a transport mirro
 not a dependency update: only members matching the current lock are restored.
 """
 import argparse
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,13 +12,9 @@ import tarfile
 import tempfile
 import urllib.request
 from package_inputs import source_records
+from package_source import digest
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def digest(path):
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def restore_archive(archive, cache, records, expected_sha256):

@@ -12,14 +12,9 @@ import re
 import shutil
 import subprocess
 import tempfile
-from package_source import application_version
+from package_source import application_version, digest
 
 ROOT = Path(__file__).resolve().parents[1]
-
-
-def digest(path):
-    with path.open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
 def main():
