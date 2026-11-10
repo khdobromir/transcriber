@@ -33,7 +33,7 @@ if(WIN32)
 else()
     set(TRANSCRIBE_PLATFORM src/platform_linux.cpp src/process.cpp src/process_guard_linux.cpp)
 endif()
-add_library(transcribe_core STATIC ${TRANSCRIBE_PLATFORM} src/platform.cpp src/cancellation.cpp
+add_library(transcribe_core STATIC ${TRANSCRIBE_PLATFORM} src/platform.cpp src/cancellation.cpp src/process_common.cpp
     src/audio.cpp src/cli.cpp src/result.cpp src/progress.cpp src/media.cpp src/pipeline.cpp src/protocol.cpp)
 target_compile_features(transcribe_core PUBLIC cxx_std_23)
 target_include_directories(transcribe_core PUBLIC src)

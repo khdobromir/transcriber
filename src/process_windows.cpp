@@ -242,42 +242,4 @@ Process::~Process() {
         }
     } catch (...) { TerminateJobObject(native_->job.get(), 1); }
 }
-void stop_all(std::vector<std::unique_ptr<Process>>& processes, int signal) {
-    for (auto& process : processes)
-        if (process && !process->done()) process->request_stop(signal);
-    std::vector<bool> usable(processes.size(), true);
-    bool waiting;
-    do {
-        waiting = false;
-        for (size_t i = 0; i < processes.size(); ++i)
-            if (auto& process = processes[i]; process && !process->done()) {
-                try {
-                    process->tick(usable[i]);
-                } catch (...) {
-                    usable[i] = false;
-                    process->request_stop(9);
-                }
-                waiting = true;
-            }
-        if (waiting) std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    } while (waiting);
-}
-void run(const std::vector<std::string>& args, const std::filesystem::path& log, Output output, Output errors, std::chrono::seconds timeout) {
-    std::vector<std::unique_ptr<Process>> processes;
-    processes.push_back(std::make_unique<Process>(args, log, std::move(output), std::move(errors)));
-    const auto start = std::chrono::steady_clock::now();
-    try {
-        while (!processes[0]->done()) {
-            check_cancelled();
-            if (timeout.count() && std::chrono::steady_clock::now() - start >= timeout) throw ProcessError(transcribe::Message{"Превышено время ожидания " + args[0], "Timed out waiting for " + args[0]}, 1);
-            processes[0]->tick();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-        check_cancelled();
-        processes[0]->require_success();
-    } catch (...) {
-        stop_all(processes, cancellation_signal() ? cancellation_signal() : 15);
-        throw;
-    }
-}
 } // namespace transcribe

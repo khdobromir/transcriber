@@ -157,7 +157,15 @@ int main(int argc, char** argv) {
             }
         } else if (kind == "curl") {
             const fs::path destination = value(args, "--output");
-            CHECK(has(args, "--continue-at") && !contains(args.back(), "/resolve/main/"));
+            CHECK(has(args, "--continue-at") && value(args, "--retry") == "3");
+            if (has(args, "--write-out")) CHECK(value(args, "--write-out") == "%{http_code}");
+            CHECK(!contains(args.back(), "/resolve/main/"));
+            const auto rejected = test::getenv("REJECT_RESUME");
+            if (!rejected.empty() && (value(args, "--continue-at") == "-" || !test::getenv("REJECT_ALWAYS").empty())) {
+                std::cout << (rejected == "416" ? "416" : "200");
+                return rejected == "416" ? 22 : 33;
+            }
+            std::cout << "200";
             std::string data = "verified fixture model\n";
             if (!test::getenv("FAIL_NETWORK").empty() || (!test::getenv("FAIL_VAD").empty() && contains(args.back(), "silero"))) {
                 write(destination, data.substr(0, 7)); return 28;

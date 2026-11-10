@@ -177,6 +177,38 @@ private slots:
         theme.reset();
         QVERIFY2(elapsed.elapsed() < 2000, "Superseded video probes must not wait for the full process timeout");
     }
+    void videoWallpaperSymlinkUpdatesToImage() {
+        QTemporaryDir temp;
+        const auto root = temp.filePath("desktop"), tools = temp.filePath("tools");
+        QVERIFY(QDir().mkpath(root));
+        QVERIFY(QDir().mkpath(tools));
+        const auto frame = temp.filePath("frame.png"), picture = temp.filePath("picture.png");
+        image(frame, QColor("#ef3211"));
+        image(picture, QColor("#14ba56"));
+        const auto calls = temp.filePath("calls");
+        for (const auto& name : {QString("ffprobe"), QString("ffmpeg")}) {
+            QFile script(tools + "/" + name);
+            QVERIFY(script.open(QIODevice::WriteOnly));
+            const auto output = name == "ffprobe" ? "echo '{\"streams\":[{\"width\":16,\"height\":16}]}'" : "/usr/bin/cat '" + frame + "'";
+            script.write(("#!/bin/sh\necho " + name + " >> '" + calls + "'\n" + output + "\n").toUtf8());
+            script.close();
+            QVERIFY(script.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner));
+        }
+        QFile video(temp.filePath("video.mp4"));
+        QVERIFY(video.open(QIODevice::WriteOnly)); video.write("fixture"); video.close();
+        QVERIFY(QFile::link(video.fileName(), root + "/background"));
+        QSettings settings(temp.filePath("settings.ini"), QSettings::IniFormat);
+        ThemeController theme(settings, tools, nullptr, root);
+        theme.setMode("light");
+        const auto expected = ThemeController::palette(ThemeController::readImage(frame).seed, false);
+        QTRY_COMPARE(theme.colors(), expected);
+        QFile log(calls); QVERIFY(log.open(QIODevice::ReadOnly));
+        const auto invocations = log.readAll();
+        QVERIFY(invocations.contains("ffprobe\n") && invocations.contains("ffmpeg\n"));
+        QVERIFY(QFile::remove(root + "/background"));
+        QVERIFY(QFile::link(picture, root + "/background"));
+        QTRY_COMPARE(theme.colors(), ThemeController::palette(ThemeController::readImage(picture).seed, false));
+    }
     void wallpaperSymlinkReplacementAndTargetChanges() {
         QTemporaryDir temp;
         const auto root = temp.filePath("desktop");

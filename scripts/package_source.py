@@ -9,11 +9,8 @@ import subprocess
 
 
 def digest(path):
-    checksum = hashlib.sha256()
     with path.open("rb") as source:
-        for block in iter(lambda: source.read(1024 * 1024), b""):
-            checksum.update(block)
-    return checksum.hexdigest()
+        return hashlib.file_digest(source, "sha256").hexdigest()
 
 
 def source_identity(project):
