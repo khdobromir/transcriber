@@ -258,6 +258,20 @@ int execute(const std::vector<std::string>& args) {
     require(ready); cancellation_token().request(2); stop_all(children, 2);
     require(children[0]->done()); children.clear(); cancellation_token().reset();
     std::cout << "PASS worker cancellation\n";
+    for (const bool cancel : {false, true}) {
+        output.clear(); bool stopped = false;
+        const auto start = std::chrono::steady_clock::now();
+        try {
+            run({binary, "--pid-wait"}, temp.path / "run-stop.log", [&](std::string_view bytes) {
+                output += bytes;
+                if (cancel && output.find('\n') != output.npos) cancellation_token().request(2);
+            }, {}, std::chrono::seconds(1));
+        } catch (const ProcessError& error) { stopped = error.code == (cancel ? 130 : 1); }
+        cancellation_token().reset();
+        require(stopped && !output.empty()); require_dead(std::stoul(output));
+        require(std::chrono::steady_clock::now() - start < std::chrono::seconds(5));
+    }
+    std::cout << "PASS run timeout/cancellation retains output and cleans worker\n";
     output.clear(); run({binary, "--grandchild"}, temp.path / "grandchild.log", [&](std::string_view bytes) { output += bytes; });
     require_dead(std::stoul(output));
     std::cout << "PASS exited parent, retained pipe and descendant cleanup\n";
