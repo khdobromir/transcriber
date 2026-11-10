@@ -59,7 +59,16 @@ ApplicationWindow {
                 Flow {
                     Layout.fillWidth: true; spacing: 8
                     UiButton { objectName: "stayButton"; text: qsTr("Остаться"); onClicked: closeDialog.close() }
-                    UiButton { objectName: "cancelCloseButton"; text: qsTr("Отменить и закрыть"); onClicked: { window.closeRequested = true; window.backend.cancel(); closeDialog.close() } }
+                    UiButton {
+                        objectName: "cancelCloseButton"
+                        text: qsTr("Отменить и закрыть")
+                        onClicked: {
+                            window.closeRequested = true
+                            closeDialog.close()
+                            if (window.backend.active) window.backend.cancel()
+                            else Qt.quit()
+                        }
+                    }
                 }
             }
         }

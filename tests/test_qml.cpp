@@ -1,6 +1,7 @@
 #include "backend.hpp"
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QCryptographicHash>
 #include <QQmlApplicationEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -246,6 +247,7 @@ private slots:
         transcribe::FileLock lock(transcribe::utf8_path((root + "/.install.lock").toUtf8().toStdString()));
         Backend backend({"missing", temp.path() + "/settings.ini", root, {{"medium", "ggml-model.bin", "http://127.0.0.1:1/model", QByteArray(64, '0')}}});
         QQmlApplicationEngine engine;
+        QSignalSpy quit(&engine, &QQmlEngine::quit);
         engine.setInitialProperties({{"backend", QVariant::fromValue(&backend)}});
         engine.load(QUrl::fromLocalFile(GUI_QML_SOURCE));
         QVERIFY(!engine.rootObjects().isEmpty());
@@ -257,12 +259,55 @@ private slots:
         auto* confirmation = window->findChild<QObject*>("closeConfirmation");
         QVERIFY(confirmation);
         QTRY_VERIFY(confirmation->property("visible").toBool());
+        QVERIFY(quit.isEmpty());
         auto* cancel = window->findChild<QObject*>("cancelCloseButton");
         QVERIFY(cancel);
         QVERIFY(QMetaObject::invokeMethod(cancel, "clicked"));
         QTRY_VERIFY_WITH_TIMEOUT(!backend.active(), 3000);
+        QTRY_VERIFY(!quit.isEmpty());
         QVERIFY(backend.error().isEmpty());
         QVERIFY(backend.modelStatus().contains(QStringLiteral("отменена")));
+    }
+    void closingAfterOperationSettles() {
+        QTemporaryDir temp;
+        QVERIFY(temp.isValid());
+        const auto root = temp.path() + "/data";
+        QVERIFY(QDir().mkpath(root + "/models"));
+        const QByteArray payload("model fixture");
+        QFile model(root + "/models/ggml-model.bin");
+        QVERIFY(model.open(QIODevice::WriteOnly));
+        QCOMPARE(model.write(payload), payload.size());
+        model.close();
+        auto lock = std::make_unique<transcribe::FileLock>(transcribe::utf8_path((root + "/.install.lock").toUtf8().toStdString()));
+        Backend backend({"missing", temp.path() + "/settings.ini", root,
+                         {{"medium", "ggml-model.bin", "http://127.0.0.1:1/model", QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex()}}});
+        QQmlApplicationEngine engine;
+        QSignalSpy quit(&engine, &QQmlEngine::quit);
+        engine.setInitialProperties({{"backend", QVariant::fromValue(&backend)}});
+        engine.load(QUrl::fromLocalFile(GUI_QML_SOURCE));
+        QVERIFY(!engine.rootObjects().isEmpty());
+        auto* window = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+        QVERIFY(window);
+        backend.downloadModel("medium");
+        QVERIFY(backend.active());
+        window->close();
+        auto* confirmation = window->findChild<QObject*>("closeConfirmation");
+        QVERIFY(confirmation);
+        QTRY_VERIFY(confirmation->property("visible").toBool());
+        lock.reset();
+        QTRY_VERIFY_WITH_TIMEOUT(!backend.active(), 3000);
+        QCOMPARE(backend.modelStatus(), QString("Модель готова"));
+        QVERIFY(backend.error().isEmpty());
+        QVERIFY(confirmation->property("visible").toBool());
+        QVERIFY(window->isVisible());
+        QVERIFY(quit.isEmpty());
+        QSignalSpy changed(&backend, &Backend::changed);
+        auto* cancel = window->findChild<QObject*>("cancelCloseButton");
+        QVERIFY(cancel);
+        QVERIFY(QMetaObject::invokeMethod(cancel, "clicked"));
+        QCOMPARE(quit.size(), 1);
+        QVERIFY(changed.isEmpty());
+        QVERIFY(!confirmation->property("visible").toBool());
     }
     void closingActiveTaskRequiresConfirmation() {
         QTemporaryDir temp;
@@ -287,6 +332,7 @@ private slots:
         settings.sync();
         Backend backend({TEST_GUI_HELPER, temp.path() + "/settings.ini", root});
         QQmlApplicationEngine engine;
+        QSignalSpy quit(&engine, &QQmlEngine::quit);
         engine.setInitialProperties({{"backend", QVariant::fromValue(&backend)}});
         engine.load(QUrl::fromLocalFile(GUI_QML_SOURCE));
         QVERIFY(!engine.rootObjects().isEmpty());
@@ -305,12 +351,14 @@ private slots:
         QVERIFY(QMetaObject::invokeMethod(stay, "clicked"));
         QTRY_VERIFY(!confirmation->property("visible").toBool());
         QVERIFY(backend.busy());
+        QVERIFY(quit.isEmpty());
         window->close();
         QTRY_VERIFY(confirmation->property("visible").toBool());
         auto* cancel = window->findChild<QObject*>("cancelCloseButton");
         QVERIFY(cancel);
         QVERIFY(QMetaObject::invokeMethod(cancel, "clicked"));
         QTRY_VERIFY_WITH_TIMEOUT(!backend.busy(), 3000);
+        QTRY_VERIFY(!quit.isEmpty());
         QCOMPARE(backend.status(), QString("Прервано"));
         QVERIFY(QFile::exists(backend.resultDirectory() + "/transcripts/transcript.txt"));
         QVERIFY(QDir(backend.resultDirectory() + "/audio").exists());
