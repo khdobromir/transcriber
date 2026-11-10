@@ -154,6 +154,30 @@ int main() {
         CHECK(kill(child.pid, SIGINT) == 0); CHECK(child.wait().code == 130); f.no_children();
         CHECK(entries(f.root / "cache/transcribe/media/entries") == 0 && fs::exists(f.result() / "audio"));
     });
+    add("cache_live_download_releases_lock_and_cancels_workers", [](Fixture& f) {
+        const std::string url = "https://example.org/video";
+        success(f.invoke({url}));
+        auto env = f.env; env["MOCK_LIVE"] = "1"; env["HANG_DOWNLOAD"] = "1";
+        Child live(f.command({"--refresh-cache", url}), env, f.root);
+        until([&] { return f.event_count("ready") == 1 && f.event_count("helper") == 1; });
+        Child cached(f.command({url}), f.env, f.root);
+        const auto result = cached.wait(std::chrono::seconds(5));
+        success(result); CHECK(contains(result.out, "из кэша"));
+        CHECK(kill(live.pid, SIGINT) == 0); CHECK(live.wait().code == 130);
+        CHECK(entries(f.root / "cache/transcribe/media/entries") == 1); f.no_children();
+    });
+    add("cache_live_refresh_invalidates_only_after_preparation", [](Fixture& f) {
+        const std::string url = "https://example.org/video";
+        success(f.invoke({url}));
+        CHECK(f.invoke({"--refresh-cache", url}, {{"MOCK_LIVE", "1"}, {"FAIL_DOWNLOAD_ONLY", "1"}}).code == 23);
+        CHECK(entries(f.root / "cache/transcribe/media/entries") == 1);
+        const auto valid = read(f.audio); write(f.audio, "broken audio");
+        CHECK(f.invoke({"--refresh-cache", url}, {{"MOCK_LIVE", "1"}}).code != 0);
+        CHECK(entries(f.root / "cache/transcribe/media/entries") == 1);
+        write(f.audio, valid);
+        success(f.invoke({"--refresh-cache", url}, {{"MOCK_LIVE", "1"}}));
+        CHECK(entries(f.root / "cache/transcribe/media/entries") == 0); f.no_children();
+    });
     add("cache_live_stream_not_saved", [](Fixture& f) {
         success(f.invoke({"https://example.org/video"}, {{"MOCK_LIVE", "1"}}));
         CHECK(entries(f.root / "cache/transcribe/media/entries") == 0);

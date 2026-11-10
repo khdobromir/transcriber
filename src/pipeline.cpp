@@ -172,6 +172,7 @@ RunResult Pipeline::run(Options o, const ToolPaths& tools) {
         metadata(paths, details, o, "processing", 0);
         std::unique_ptr<transcribe::MediaCache> cache;
         std::optional<transcribe::MediaCache::Entry> cached;
+        bool live_cache = false;
         transcribe::SourceInfo source;
         std::string context;
         const auto cache_warning = [&](const std::exception& error) {
@@ -199,6 +200,8 @@ RunResult Pipeline::run(Options o, const ToolPaths& tools) {
                         cache.reset();
                     }
             }
+            live_cache = cache && source.live;
+            if (live_cache) cache.reset();
             paths.name(source.title);
             details += "Название: " + transcribe::safe_title(source.title) + '\n';
             sink_(Event{.type = EventType::result, .result = paths.root});
@@ -239,6 +242,9 @@ RunResult Pipeline::run(Options o, const ToolPaths& tools) {
                 } catch (const std::exception& error) { sink_(transcribe::localized_event(Event{.type = EventType::warning, .result = paths.root}, transcribe::exception_message(error))); }
             std::rethrow_exception(failure);
         }
+        if (live_cache) try {
+                cache = std::make_unique<transcribe::MediaCache>(o.cache_dir.empty() ? transcribe::default_cache() : o.cache_dir, o.cache_limit);
+            } catch (const std::exception& error) { cache_warning(error); }
         if (cache && !cached) try {
                 if (!cache->publish(source, context, o.input, input))
                     sink_(transcribe::localized_event(Event{.type = EventType::warning, .result = paths.root}, transcribe::Message{"аудио не сохранено в кэше (размер превышает лимит или live-поток).", "audio was not cached (size exceeds the limit or this is a live stream)."}));
