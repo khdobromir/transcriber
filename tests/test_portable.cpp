@@ -259,16 +259,16 @@ int execute(const std::vector<std::string>& args) {
     require(children[0]->done()); children.clear(); cancellation_token().reset();
     std::cout << "PASS worker cancellation\n";
     for (const bool cancel : {false, true}) {
-        output.clear(); bool stopped = false;
+        output.clear(); bool runStopped = false;
         const auto start = std::chrono::steady_clock::now();
         try {
             run({binary, "--pid-wait"}, temp.path / "run-stop.log", [&](std::string_view bytes) {
                 output += bytes;
                 if (cancel && output.find('\n') != output.npos) cancellation_token().request(2);
             }, {}, std::chrono::seconds(1));
-        } catch (const ProcessError& error) { stopped = error.code == (cancel ? 130 : 1); }
+        } catch (const ProcessError& error) { runStopped = error.code == (cancel ? 130 : 1); }
         cancellation_token().reset();
-        require(stopped && !output.empty()); require_dead(std::stoul(output));
+        require(runStopped && !output.empty()); require_dead(std::stoul(output));
         require(std::chrono::steady_clock::now() - start < std::chrono::seconds(5));
     }
     std::cout << "PASS run timeout/cancellation retains output and cleans worker\n";
