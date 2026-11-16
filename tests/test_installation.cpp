@@ -85,7 +85,10 @@ int main() {
         f.previous(); CHECK(f.invoke("install.sh", {"small"}, {{"FAIL_BUILD", "1"}}).code == 42); f.preserved(); CHECK(f.calls("curl").empty());
     });
     add("network_failure_preserves_previous_installation", [](Fixture& f) {
-        f.previous(); CHECK(f.invoke("install.sh", {"small"}, {{"FAIL_NETWORK", "1"}}).code == 28); f.preserved(); CHECK(read(f.partial()) == payload.substr(0, 7) && !fs::exists(f.model()));
+        f.previous();
+        CHECK(f.invoke("install.sh", {"small"}, {{"FAIL_NETWORK", "1"}}).code == 28);
+        f.preserved();
+        CHECK(read(f.partial()) == payload.substr(0, 7) && !fs::exists(f.model()));
     });
     add("vad_failure_preserves_previous_installation", [](Fixture& f) {
         f.previous(); CHECK(f.invoke("install.sh", {"small"}, {{"FAIL_VAD", "1"}}).code == 28); f.preserved(); CHECK(read(f.model()) == payload);
@@ -107,7 +110,8 @@ int main() {
             write(f.partial(), "stale partial");
             success(f.invoke("scripts/download-model.sh", {"small"}, {{"REJECT_RESUME", rejection}}));
             CHECK(read(f.model()) == payload && !fs::exists(f.partial()));
-            const auto calls = f.calls("curl"); CHECK(calls.size() == 2);
+            const auto calls = f.calls("curl");
+            CHECK(calls.size() == 2);
             CHECK(value(calls[0], "--continue-at") == "-" && value(calls[1], "--continue-at") == "0");
         });
         add(std::string("rejected_resume_retries_once_") + rejection, [=](Fixture& f) {

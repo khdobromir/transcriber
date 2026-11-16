@@ -279,8 +279,7 @@ private slots:
         QCOMPARE(model.write(payload), payload.size());
         model.close();
         auto lock = std::make_unique<transcribe::FileLock>(transcribe::utf8_path((root + "/.install.lock").toUtf8().toStdString()));
-        Backend backend({"missing", temp.path() + "/settings.ini", root,
-                         {{"medium", "ggml-model.bin", "http://127.0.0.1:1/model", QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex()}}});
+        Backend backend({"missing", temp.path() + "/settings.ini", root, {{"medium", "ggml-model.bin", "http://127.0.0.1:1/model", QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex()}}});
         QQmlApplicationEngine engine;
         QSignalSpy quit(&engine, &QQmlEngine::quit);
         engine.setInitialProperties({{"backend", QVariant::fromValue(&backend)}});

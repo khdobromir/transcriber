@@ -195,14 +195,17 @@ private slots:
             QVERIFY(script.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner));
         }
         QFile video(temp.filePath("video.mp4"));
-        QVERIFY(video.open(QIODevice::WriteOnly)); video.write("fixture"); video.close();
+        QVERIFY(video.open(QIODevice::WriteOnly));
+        video.write("fixture");
+        video.close();
         QVERIFY(QFile::link(video.fileName(), root + "/background"));
         QSettings settings(temp.filePath("settings.ini"), QSettings::IniFormat);
         ThemeController theme(settings, tools, nullptr, root);
         theme.setMode("light");
         const auto expected = ThemeController::palette(ThemeController::readImage(frame).seed, false);
         QTRY_COMPARE(theme.colors(), expected);
-        QFile log(calls); QVERIFY(log.open(QIODevice::ReadOnly));
+        QFile log(calls);
+        QVERIFY(log.open(QIODevice::ReadOnly));
         const auto invocations = log.readAll();
         QVERIFY(invocations.contains("ffprobe\n") && invocations.contains("ffmpeg\n"));
         QVERIFY(QFile::remove(root + "/background"));
