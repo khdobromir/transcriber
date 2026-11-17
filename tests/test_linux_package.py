@@ -1,4 +1,5 @@
 """Regressions for hostile downloads/archives and complete Linux manifests."""
+import hashlib
 import importlib.util
 import io
 import json
@@ -103,7 +104,7 @@ class LinuxPackageTests(unittest.TestCase):
             root = Path(temporary)
             data = b"Verified source input"
             record = dict(filename="retry-source.tar", url="https://example.invalid/source.tar",
-                          sha256=builder.hashlib.sha256(data).hexdigest())
+                          sha256=hashlib.sha256(data).hexdigest())
             def response(content):
                 stream = io.BytesIO(content); stream.geturl = lambda: record["url"]
                 return stream
@@ -140,7 +141,7 @@ class LinuxPackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary); data = b"Verified network retry input"
             record = dict(filename="network-source.tar", url="https://example.invalid/source.tar",
-                          sha256=builder.hashlib.sha256(data).hexdigest())
+                          sha256=hashlib.sha256(data).hexdigest())
             response = io.BytesIO(data); response.geturl = lambda: record["url"]
             def unavailable():
                 return builder.urllib.error.URLError(OSError(errno.ENETUNREACH, "Network is unreachable"))

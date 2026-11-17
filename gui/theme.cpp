@@ -422,7 +422,7 @@ void ThemeController::resolve() {
         emit changed();
         return;
     }
-    path = info.absoluteFilePath();
+    path = info.canonicalFilePath();
     const auto signature = path + info.canonicalFilePath() + QString::number(info.size()) + QString::number(info.lastModified().toMSecsSinceEpoch());
     if (watcher_.isRunning()) {
         if (signature != signature_) {

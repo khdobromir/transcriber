@@ -155,6 +155,7 @@ if(BUILD_TESTING)
         liveLanguagePreservesWindowAndMessages
         windowLoadsAndKeyboardFocusWorks
         closingModelInstallationIsAsynchronous
+        closingAfterOperationSettles
         closingActiveTaskRequiresConfirmation)
     foreach(scenario IN LISTS qml_scenarios)
         add_test(NAME gui_qml_${scenario} COMMAND test_qml ${scenario}

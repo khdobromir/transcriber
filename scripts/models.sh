@@ -68,9 +68,24 @@ download_model() {
     return 0
   fi
   # Network failure preserves .part for resuming; a hash failure rejects it.
-  curl --fail --location --retry 3 --continue-at - --connect-timeout 30 \
-    --proto '=https' --proto-redir '=https' --output "$target.part" \
-    "https://huggingface.co/$model_repository/resolve/$model_revision/$model_filename"
+  local attempt http code resume=0 offset=-
+  [[ ! -s "$target.part" ]] || resume=1
+  for attempt in 1 2; do
+    if http="$(curl --fail --location --retry 3 --continue-at "$offset" --connect-timeout 30 \
+      --proto '=https' --proto-redir '=https' --write-out '%{http_code}' --output "$target.part" \
+      "https://huggingface.co/$model_repository/resolve/$model_revision/$model_filename")"; then
+      code=0
+    else
+      code=$?
+    fi
+    if (( resume && attempt == 1 )) && [[ "$http" == 416 || "$code" == 33 ]]; then
+      rm -f -- "$target.part"
+      offset=0
+      continue
+    fi
+    (( code == 0 )) || return "$code"
+    break
+  done
   if ! verify_model "$target.part" "$model_sha256"; then
     printf 'SHA-256 загрузки не совпадает: %s.part. Повтори загрузку.\n' "$target" >&2
     rm -f -- "$target.part"

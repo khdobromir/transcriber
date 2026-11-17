@@ -4,15 +4,10 @@ Read-only: never uploads, tags, publishes, or rewrites artifacts. Automatically
 generated GitHub source archives are not uploaded assets and are checked separately.
 """
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import re
-
-
-def digest(path):
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+from package_source import digest
 
 
 def asset_names(version):

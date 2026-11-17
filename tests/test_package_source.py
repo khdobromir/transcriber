@@ -16,12 +16,20 @@ import zlib
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from package_source import application_version, validate_identity
+from package_source import application_version, digest, validate_identity
 from package_inputs import archive_inputs, source_records
 from package_notices import collect_qt_notices
 
 
 class SourceIdentityTests(unittest.TestCase):
+    def test_file_digest_empty_small_and_multiblock(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "input"
+            for data in (b"", b"small file\n", bytes(range(256)) * 10001):
+                with self.subTest(size=len(data)):
+                    path.write_bytes(data)
+                    self.assertEqual(digest(path), hashlib.sha256(data).hexdigest())
+
     def test_sdk_build_settings_retain_original_features_and_reject_other_versions(self):
         from package_sdk_settings import retain_settings
         with tempfile.TemporaryDirectory() as temporary:
